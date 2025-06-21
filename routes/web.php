@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
         return view('pengurangan.filter_cetak_pdf', compact('kecamatans'));
     })->name('laporan.pengurangan.filter-pdf');
     Route::get('/laporan-pengurangan/cetak-pdf-filtered', [PenguranganController::class, 'cetakFilteredPdf'])->name('laporan.pengurangan.cetak-pdf-filtered');
-
+    
 
     // --- ROUTE UNTUK MANAJEMEN USER (Admin only) ---
     Route::prefix('users')->name('users.')->middleware('admin')->group(function () {
@@ -82,6 +82,12 @@ Route::middleware('auth')->group(function () {
             return view('denda_administratif.filter_cetak_pdf', compact('kecamatans'));
         })->name('filter-pdf');
         Route::get('/laporan/cetak-pdf-filtered', [DendaAdministratifController::class, 'cetakFilteredPdf'])->name('cetak-pdf-filtered');
+    });
+    Route::prefix('daftar-nominatif')->name('dafnom.')->group(function() {
+        Route::get('/', [App\Http\Controllers\DafnomController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\DafnomController::class, 'store'])->name('store');
+        Route::get('/get-kelurahan/{kd_kecamatan}', [App\Http\Controllers\DafnomController::class, 'getKelurahanByKecamatan'])->name('getKelurahan');
+        Route::get('/log-status/{log}', [App\Http\Controllers\DafnomController::class, 'getLogStatus'])->name('log.status');
     });
 });
 

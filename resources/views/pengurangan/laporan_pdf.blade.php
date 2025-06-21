@@ -1,65 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laporan Pengurangan SPPT</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
-        body {
-            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-            margin: 20px;
-            font-size: 10px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-        }
-        .header p {
-            margin: 0;
-            font-size: 12px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 9px;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 5px;
-            text-align: left;
-            word-wrap: break-word;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        /* Atur lebar kolom secara proporsional */
-        th:nth-child(1), td:nth-child(1) { width: 10%; } /* NOP */
-        th:nth-child(2), td:nth-child(2) { width: 4%; }  /* Tahun Pajak */
-        th:nth-child(3), td:nth-child(3) { width: 8%; }  /* Nama WP */
-        th:nth-child(4), td:nth-child(4) { width: 12%; } /* Alamat WP */
-        th:nth-child(5), td:nth-child(5) { width: 12%; } /* Letak OP */
-        th:nth-child(6), td:nth-child(6) { width: 4%; }  /* Bumi */
-        th:nth-child(7), td:nth-child(7) { width: 4%; }  /* Bangunan */
-        th:nth-child(8), td:nth-child(8) { width: 6%; }  /* Baku */
-        th:nth-child(9), td:nth-child(9) { width: 5%; }  /* Pengurangan (%) */
-        th:nth-child(10), td:nth-child(10) { width: 6%; } /* Jumlah Pengurangan */
-        th:nth-child(11), td:nth-child(11) { width: 7%; } /* Ketetapan */
-        th:nth-child(12), td:nth-child(12) { width: 8%; } /* No SK */
-        th:nth-child(13), td:nth-child(13) { width: 5%; } /* Tgl SK */
-        th:nth-child(14), td:nth-child(14) { width: 9%; } /* Tgl Proses */
+    body {
+        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        margin: 20px;
+        font-size: 10px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+    .header p {
+        margin: 0;
+        font-size: 12px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 8px; /* Ukuran font dikecilkan sedikit untuk memuat lebih banyak */
+        table-layout: fixed;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 4px; /* Padding disesuaikan */
+        text-align: left;
+        word-wrap: break-word;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    
+    /* Lebar kolom yang disesuaikan agar lebih rapi */
+    th:nth-child(1), td:nth-child(1) { width: 10%; }   /* NOP */
+    th:nth-child(2), td:nth-child(2) { width: 4%; }   /* Tahun Pajak */
+    th:nth-child(3), td:nth-child(3) { width: 9%; }   /* Nama WP (diperlebar) */
+    th:nth-child(4), td:nth-child(4) { width: 13%; }  /* Alamat WP (diperlebar) */
+    th:nth-child(5), td:nth-child(5) { width: 13%; }  /* Letak OP (diperlebar) */
+    th:nth-child(6), td:nth-child(6) { width: 4%; }   /* Bumi */
+    th:nth-child(7), td:nth-child(7) { width: 4%; }   /* Bangunan */
+    th:nth-child(8), td:nth-child(8) { width: 6%; }   /* Baku */
+    th:nth-child(9), td:nth-child(9) { width: 5%; }   /* Pengurangan (%) */
+    th:nth-child(10), td:nth-child(10) { width: 6%; } /* Jumlah Pengurangan */
+    th:nth-child(11), td:nth-child(11) { width: 7%; } /* Ketetapan */
+    th:nth-child(12), td:nth-child(12) { width: 9%; } /* No SK (diperlebar) */
+    th:nth-child(13), td:nth-child(13) { width: 5%; } /* Tgl SK */
+    th:nth-child(14), td:nth-child(14) { width: 6%; } /* Tgl Proses (dipersempit) */
 
-        .footer {
-            text-align: right;
-            margin-top: 20px;
-            font-size: 10px;
-        }
-    </style>
+    .footer {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 10px;
+    }
+</style>
 </head>
 <body>
     <div class="header">
@@ -81,9 +80,9 @@
                 <th>Pengurangan (%)</th>
                 <th>Jumlah Pengurangan</th>
                 <th>Ketetapan Yang Harus Dibayar</th>
-                <th>No SK</th>
-                <th>Tgl SK</th>
-                <th>Tgl Proses</th>
+                <th>Nomor SK</th>
+                <th>Tanggal SK</th>
+                <th>Tanggal Proses</th>
             </tr>
         </thead>
         <tbody>

@@ -61,6 +61,10 @@
                                         </li>
                                     <?php endif; ?>
 
+                                        <li class="mb-2">
+                                            <a href="<?php echo e(route('dafnom.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Pembentukan Dafnom</a>
+                                        </li>
+
                                     
                                     <?php if(Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">

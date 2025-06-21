@@ -660,4 +660,25 @@ class DendaAdministratifController extends Controller
 
     return redirect()->back()->with('error', 'Format ekspor tidak valid.');
 }
+
+        public function cetakSinglePdf(int $id)
+{
+    // 1. Cari data denda berdasarkan ID
+    $denda = DendaAdministratif::findOrFail($id);
+
+    // 2. Bungkus satu data tersebut ke dalam collection
+    $dataLaporan = collect([$denda]);
+
+    // 3. Definisikan ukuran kertas F4 Landscape (dalam point)
+    $f4LandscapeCustomPaper = array(0, 0, 935.433, 609.448);
+
+    // 4. Buat PDF dari view, kirimkan data, dan atur ukuran kertas ke F4
+    $pdf = PDF::loadView('denda_administratif.laporan_pdf', compact('dataLaporan'))
+              ->setPaper($f4LandscapeCustomPaper); // <-- Ukuran diubah ke F4
+
+    // 5. Buat nama file yang unik dan kirimkan sebagai download
+    $fileName = 'denda_sppt_' . str_replace('.', '', $denda->formatted_nop) . '_' . $denda->thn_pajak_sppt . '.pdf';
+
+    return $pdf->download($fileName);
+}
 }
