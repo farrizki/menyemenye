@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/{id}/edit', [DendaAdministratifController::class, 'edit'])->name('edit');
         Route::patch('/laporan/{id}', [DendaAdministratifController::class, 'update'])->name('update');
         Route::delete('/laporan/{id}', [DendaAdministratifController::class, 'destroy'])->name('destroy');
+        
 
         Route::get('/laporan/filter-pdf', function(Request $request) {
             $kecamatans = RefKecamatan::on('oracle')

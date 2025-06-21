@@ -26,6 +26,38 @@ class DendaAdministratifController extends Controller
     /**
      * Method untuk menampilkan form input Penghapusan Denda Administratif.
      */
+    public function index(Request $request)
+{
+    $query = DendaAdministratif::orderBy('created_at', 'desc');
+
+    if ($request->has('search') && $request->input('search') != '') {
+        $search = strtolower($request->input('search'));
+
+        $query->where(function ($q) use ($search) {
+            // Mencari berdasarkan NOP (tanpa titik)
+            $q->orWhereRaw("LOWER(CONCAT(kd_propinsi, kd_dati2, kd_kecamatan, kd_kelurahan, kd_blok, no_urut, kd_jns_op)) LIKE ?", ['%' . preg_replace('/[^0-9]/', '', $search) . '%']);
+            // Mencari berdasarkan field lainnya
+            $q->orWhereRaw("LOWER(nm_wp_sppt) LIKE ?", ['%' . $search . '%']);
+            $q->orWhereRaw("CAST(thn_pajak_sppt AS CHAR) LIKE ?", ['%' . $search . '%']);
+            $q->orWhereRaw("LOWER(alamat_wp) LIKE ?", ['%' . $search . '%']);
+            $q->orWhereRaw("LOWER(no_sk) LIKE ?", ['%' . $search . '%']);
+        });
+    }
+
+    $laporanDenda = $query->paginate(25);
+
+    // Mengambil flash session dari proses confirmStore, jika ada
+    $flashResults = session('denda_results', []);
+
+    // Untuk request AJAX (pencarian atau paginasi)
+    if ($request->ajax()) {
+        return view('denda_administratif.partials.laporan_table', compact('laporanDenda'))->render();
+    }
+
+    // Untuk load halaman pertama kali
+    return view('denda_administratif.index', compact('laporanDenda', 'flashResults'));
+}
+     
     public function create()
     {
         // Data untuk dropdown kecamatan/kelurahan
@@ -161,7 +193,7 @@ class DendaAdministratifController extends Controller
         foreach ($inputNopList as $nop) {
             if (strlen($nop) != 18) {
                 $dataToProcess[] = [
-                    'nop' => $nop, 'thn_pajak_sppt' => 'N/A', 'status_validasi' => 'Gagal', 'message' => 'Format NOP tidak valid: ' . $nop . '. Must be 18 characters.'
+                    'nop' => $nop, 'thn_pajak_sppt' => 'N/A', 'status_validasi' => 'Gagal', 'message' => 'Format NOP tidak valid: ' . $nop . '. Harus 18 digit.'
                 ]; continue;
             }
 
@@ -175,7 +207,7 @@ class DendaAdministratifController extends Controller
             if (empty($targetYearsForNop)) {
                  $dataToProcess[] = [
                     'nop' => $nop, 'thn_pajak_sppt' => 'N/A', 'status_validasi' => 'Gagal',
-                    'message' => 'No tax year specified for this NOP.'
+                    'message' => 'Nop tidak ditemukan pada tahun tersebut.'
                 ]; continue;
             }
 
@@ -191,15 +223,15 @@ class DendaAdministratifController extends Controller
                         ->first();
 
                     $statusValidasi = 'Gagal';
-                    $message = 'Data SPPT not found for NOP/Year.';
+                    $message = 'Nop tidak ditemukan pada tahun tersebut.';
 
                     if ($spptData) {
                         if ((int)($spptData->status_pembayaran_sppt ?? 99) !== 0) {
                             $statusValidasi = 'Tidak Diproses'; 
-                            $message = 'SPPT already paid (Status: ' . ($spptData->status_pembayaran_sppt ?? 'NULL') . ').';
+                            $message = 'Nop sudah lunas (Status: ' . ($spptData->status_pembayaran_sppt ?? 'NULL') . ').';
                         } else {
                             $statusValidasi = 'Siap Diproses';
-                            $message = 'Data found and ready for fine processing.';
+                            $message = 'Data ditemukan.';
                         }
                     }
 
@@ -552,4 +584,80 @@ class DendaAdministratifController extends Controller
         }
         return $nopRaw;
     }
+
+    public function cetakFilteredPdf(Request $request)
+{
+    $request->validate([
+        'tahun_pajak' => 'nullable|integer|min:2000|max:2100',
+        'kd_kecamatan' => 'nullable|string',
+        'no_sk' => 'nullable|string',
+        'format' => 'required|in:pdf,excel',
+    ]);
+
+    $query = DendaAdministratif::query()->orderBy('created_at', 'asc');
+
+    if ($request->filled('tahun_pajak')) {
+        $query->where('thn_pajak_sppt', $request->input('tahun_pajak'));
+    }
+    if ($request->filled('kd_kecamatan')) {
+        $query->where('kd_kecamatan', $request->input('kd_kecamatan'));
+    }
+    if ($request->filled('no_sk')) {
+        $query->where('no_sk', 'LIKE', '%' . $request->input('no_sk') . '%');
+    }
+
+    $dataLaporan = $query->get();
+
+    $fileNameBase = 'laporan_denda_administratif_' . Carbon::now()->format('Ymd_His');
+
+    if ($request->input('format') === 'pdf') {
+        $pdf = PDF::loadView('denda_administratif.laporan_pdf', compact('dataLaporan'))
+                  ->setPaper('a4', 'landscape');
+        return $pdf->download($fileNameBase . '.pdf');
+
+    } elseif ($request->input('format') === 'excel') {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = [
+            'NOP', 'Tahun Pajak', 'Nama WP', 'Alamat WP', 'Letak OP', 'Pokok', 'Denda',
+            'Jumlah Pajak', 'Sanksi Administratif', 'Yang Harus Dibayar', 'No SK',
+            'Tgl SK', 'Tgl Jatuh Tempo Baru', 'Tgl Proses', 'Operator'
+        ];
+        $sheet->fromArray([$headers], null, 'A1');
+
+        $rowNum = 2;
+        foreach ($dataLaporan as $data) {
+            $rowData = [
+                $data->formatted_nop,
+                $data->thn_pajak_sppt,
+                $data->nm_wp_sppt ?? '-',
+                $data->alamat_wp ?? '-',
+                $data->letak_op ?? '-',
+                (float)($data->pokok ?? 0),
+                (float)($data->denda ?? 0),
+                (float)($data->jumlah_pajak ?? 0),
+                (float)($data->sanksi_administratif ?? 0),
+                (float)($data->yang_harus_dibayar ?? 0),
+                $data->no_sk ?? '-',
+                $data->tgl_sk ? Carbon::parse($data->tgl_sk)->format('d-m-Y') : '-',
+                $data->tgl_jatuh_tempo_baru ? Carbon::parse($data->tgl_jatuh_tempo_baru)->format('d-m-Y') : '-',
+                $data->created_at->format('d-m-Y H:i:s'),
+                $data->operator ?? '-',
+            ];
+            $sheet->fromArray([$rowData], null, 'A' . $rowNum);
+            $rowNum++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        return response()->stream(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $fileNameBase . '.xlsx"',
+        ]);
+    }
+
+    return redirect()->back()->with('error', 'Format ekspor tidak valid.');
+}
 }

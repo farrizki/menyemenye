@@ -43,7 +43,7 @@
                                     <span class="ml-2 text-sm text-gray-600">PDF</span>
                                 </label>
                                 <label class="inline-flex items-center">
-                                    <input type="radio" name="format" value="xlsx" class="rounded-full border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('format') == 'xlsx' ? 'checked' : '' }}>
+                                    <input type="radio" name="format" value="excel" class="rounded-full border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('format') == 'excel' ? 'checked' : '' }}>
                                     <span class="ml-2 text-sm text-gray-600">Excel</span>
                                 </label>
                             </div>

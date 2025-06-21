@@ -67,21 +67,41 @@
                             </table>
                         </div>
 
-                        <p class="mb-2">Nomor SK Pengurangan: <strong>{{ $noSkPengurangan ?? '-' }}</strong></p>
-                        <p class="mb-4">Tanggal SK Pengurangan: <strong>{{ $tglSkPengurangan ? \Carbon\Carbon::parse($tglSkPengurangan)->format('d-m-Y') : '-' }}</strong></p>
 
 
-                        <div class="flex justify-end mt-4">
-                            <form action="{{ route('pengurangan.confirm') }}" method="POST">
-                                @csrf
-                                <x-secondary-button class="mr-4" type="button" onclick="window.location='{{ route('pengurangan.create') }}'">
-                                    {{ __('Batalkan') }}
-                                </x-secondary-button>
-                                <x-primary-button>
-                                    {{ __('Konfirmasi & Simpan') }}
-                                </x-primary-button>
-                            </form>
-                        </div>
+@php
+    $jumlahNopSiapDiproses = collect($dataToProcess)
+                                ->where('status_validasi', 'Siap Diproses')
+                                ->count();
+@endphp
+
+{{-- Tampilkan Informasi Ringkasan --}}
+<div class="mt-6 border-t pt-4">
+    <p class="mb-2 font-semibold text-gray-800">Jumlah NOP yang akan diproses: <strong>{{ $jumlahNopSiapDiproses }}</strong></p>
+    <p class="mb-2">Nomor SK Pengurangan: <strong>{{ $noSkPengurangan ?? '-' }}</strong></p>
+    <p class="mb-4">Tanggal SK Pengurangan: <strong>{{ $tglSkPengurangan ? \Carbon\Carbon::parse($tglSkPengurangan)->format('d-m-Y') : '-' }}</strong></p>
+</div>
+
+
+<div class="flex justify-end mt-4">
+    <form action="{{ route('pengurangan.confirm') }}" method="POST">
+        @csrf
+         <a href="{{ route('pengurangan.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-400 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-600 focus:outline-none focus:border-gray-600 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 mr-2">
+            {{ __('Batalkan') }}
+        </a>
+
+        {{-- Tombol Konfirmasi & Simpan hanya aktif jika ada data yang Siap Diproses --}}
+        @if ($jumlahNopSiapDiproses > 0)
+             <x-primary-button>
+                {{ __('Konfirmasi & Simpan') }}
+            </x-primary-button>
+        @else
+            <x-primary-button disabled title="Tidak ada data yang siap disimpan">
+                {{ __('Konfirmasi & Simpan') }}
+            </x-primary-button>
+        @endif
+    </form>
+</div>
                     @endif
                 </div>
             </div>
