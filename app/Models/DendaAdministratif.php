@@ -10,7 +10,7 @@ class DendaAdministratif extends Model
 {
     use HasFactory;
 
-    protected $connection = 'oracle';
+
     protected $table = 'denda_administratif';
     public $timestamps = true;
 

@@ -69,7 +69,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/cetak-pdf', [DendaAdministratifController::class, 'cetakPdf'])->name('cetak-pdf');
         Route::get('/laporan/{id}/cetak-pdf', [DendaAdministratifController::class, 'cetakSinglePdf'])->name('cetak-single-pdf');
         Route::get('/laporan/{id}/edit', [DendaAdministratifController::class, 'edit'])->name('edit');
-        Route::patch('/laporan/{id}', [DendaAdministratifController::class, 'update'])->name('update');
+        //Route::patch('/laporan/{id}', [DendaAdministratifController::class, 'update'])->name('update');
         Route::delete('/laporan/{id}', [DendaAdministratifController::class, 'destroy'])->name('destroy');
         
 
@@ -88,6 +88,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [App\Http\Controllers\DafnomController::class, 'store'])->name('store');
         Route::get('/get-kelurahan/{kd_kecamatan}', [App\Http\Controllers\DafnomController::class, 'getKelurahanByKecamatan'])->name('getKelurahan');
         Route::get('/log-status/{log}', [App\Http\Controllers\DafnomController::class, 'getLogStatus'])->name('log.status');
+    });
+
+    Route::prefix('pembatalan-sppt')->name('pembatalan.')->group(function () {
+        Route::get('/create', [\App\Http\Controllers\PembatalanController::class, 'create'])->name('create');
+        Route::post('/preview', [\App\Http\Controllers\PembatalanController::class, 'preview'])->name('preview');
+        Route::post('/store', [\App\Http\Controllers\PembatalanController::class, 'store'])->name('store');
+        Route::get('/laporan', [\App\Http\Controllers\PembatalanController::class, 'index'])->name('index');
+        Route::get('/{pembatalan}/edit', [\App\Http\Controllers\PembatalanController::class, 'edit'])->name('edit');
+        Route::patch('/{pembatalan}', [\App\Http\Controllers\PembatalanController::class, 'update'])->name('update');
+        Route::delete('/{pembatalan}', [\App\Http\Controllers\PembatalanController::class, 'destroy'])->name('destroy');
+        Route::get('/{pembatalan}/cetak-pdf', [\App\Http\Controllers\PembatalanController::class, 'cetakSinglePdf'])->name('cetak-single-pdf');
+        Route::get('/filter-cetak-pdf', [\App\Http\Controllers\PembatalanController::class, 'showFilterCetakPdfForm'])->name('filter-cetak-pdf');
+        Route::get('/cetak-pdf-filtered', [\App\Http\Controllers\PembatalanController::class, 'cetakFilteredPdf'])->name('cetak-pdf-filtered');
     });
 });
 

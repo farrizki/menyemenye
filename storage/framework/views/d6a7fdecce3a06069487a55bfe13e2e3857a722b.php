@@ -14,16 +14,20 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            <?php echo $__env->make('layouts.navigation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            
+            
+            <div class="sticky top-0 z-50 w-full">
+                <?php echo $__env->make('layouts.navigation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-            <?php if(isset($header)): ?>
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        <?php echo e($header); ?>
+                <?php if(isset($header)): ?>
+                    <header class="bg-white shadow">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            <?php echo e($header); ?>
 
-                    </div>
-                </header>
-            <?php endif; ?>
+                        </div>
+                    </header>
+                <?php endif; ?>
+            </div>
 
             <main class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex">
@@ -34,41 +38,56 @@
                             <ul>
                                 <?php if(auth()->guard()->check()): ?>
                                     <li class="mb-2">
-                                        <a href="<?php echo e(route('dashboard')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Dashboard</a>
+                                        <a href="<?php echo e(route('dashboard')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('dashboard')): ?> bg-gray-200 <?php endif; ?>">Dashboard</a>
                                     </li>
 
                                     
-                                    <?php if(Auth::user()->canAccessMenu('pengurangan.create')): ?>
+                                    <?php if(Auth::user()->canAccessMenu('pengurangan.create') || Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('pengurangan.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Pengurangan SPPT</a>
+                                            <a href="<?php echo e(route('pengurangan.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('pengurangan.create')): ?> bg-gray-200 <?php endif; ?>">Pengurangan SPPT</a>
                                         </li>
                                     <?php endif; ?>
-                                    <?php if(Auth::user()->canAccessMenu('laporan.pengurangan')): ?>
+                                    <?php if(Auth::user()->canAccessMenu('laporan.pengurangan') || Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('laporan.pengurangan')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Laporan Pengurangan</a>
+                                            <a href="<?php echo e(route('laporan.pengurangan')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('laporan.pengurangan')): ?> bg-gray-200 <?php endif; ?>">Laporan Pengurangan</a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    
+                                    <?php if(Auth::user()->canAccessMenu('denda_administratif.create') || Auth::user()->isAdmin()): ?>
+                                        <li class="mb-2">
+                                            <a href="<?php echo e(route('denda_administratif.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('denda_administratif.create')): ?> bg-gray-200 <?php endif; ?>">Penghapusan Denda</a>
+                                        </li>
+                                    <?php endif; ?>
+                                     <?php if(Auth::user()->canAccessMenu('denda_administratif.index') || Auth::user()->isAdmin()): ?>
+                                        <li class="mb-2">
+                                            <a href="<?php echo e(route('denda_administratif.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('denda_administratif.index')): ?> bg-gray-200 <?php endif; ?>">Laporan Denda</a>
                                         </li>
                                     <?php endif; ?>
 
                                     
-                                    <?php if(Auth::user()->canAccessMenu('denda_administratif.create')): ?>
+                                    <?php if(Auth::user()->canAccessMenu('pembatalan.create') || Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('denda_administratif.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Penghapusan Denda</a>
+                                            <a href="<?php echo e(route('pembatalan.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('pembatalan.create')): ?> bg-gray-200 <?php endif; ?>">Pembatalan SPPT</a>
                                         </li>
                                     <?php endif; ?>
-                                    <?php if(Auth::user()->canAccessMenu('denda_administratif.index')): ?>
+                                     <?php if(Auth::user()->canAccessMenu('pembatalan.index') || Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('denda_administratif.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Laporan Denda</a>
+                                            <a href="<?php echo e(route('pembatalan.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('pembatalan.index')): ?> bg-gray-200 <?php endif; ?>">Laporan Pembatalan</a>
                                         </li>
                                     <?php endif; ?>
-
+                                    
+                                    
+                                    <?php if(Auth::user()->canAccessMenu('dafnom.create') || Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('dafnom.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Pembentukan Dafnom</a>
+                                            <a href="<?php echo e(route('dafnom.create')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('dafnom.create')): ?> bg-gray-200 <?php endif; ?>">Pembentukan Dafnom</a>
                                         </li>
-
+                                    <?php endif; ?>
+                                    
                                     
                                     <?php if(Auth::user()->isAdmin()): ?>
                                         <li class="mb-2">
-                                            <a href="<?php echo e(route('users.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Manajemen User</a>
+                                            <a href="<?php echo e(route('users.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('users.index')): ?> bg-gray-200 <?php endif; ?>">Manajemen User</a>
                                         </li>
                                     <?php endif; ?>
                                 <?php endif; ?>

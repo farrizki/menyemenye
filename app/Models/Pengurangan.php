@@ -9,7 +9,7 @@ class Pengurangan extends Model
 {
     use HasFactory;
 
-    protected $connection = 'oracle';
+
     protected $table = 'pengurangan';
     public $timestamps = true;
 

@@ -14,15 +14,19 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+            
+            {{-- PERUBAHAN DI SINI: Wrapper untuk membuat header menjadi sticky --}}
+            <div class="sticky top-0 z-50 w-full">
+                @include('layouts.navigation')
 
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+                @if (isset($header))
+                    <header class="bg-white shadow">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
+            </div>
 
             <main class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex">
@@ -33,41 +37,56 @@
                             <ul>
                                 @auth
                                     <li class="mb-2">
-                                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Dashboard</a>
+                                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('dashboard')) bg-gray-200 @endif">Dashboard</a>
                                     </li>
 
-                                    {{-- Menu untuk Pengurangan SPPT --}}
-                                    @if (Auth::user()->canAccessMenu('pengurangan.create'))
+                                    {{-- Menu Pengurangan --}}
+                                    @if (Auth::user()->canAccessMenu('pengurangan.create') || Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('pengurangan.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Pengurangan SPPT</a>
+                                            <a href="{{ route('pengurangan.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('pengurangan.create')) bg-gray-200 @endif">Pengurangan SPPT</a>
                                         </li>
                                     @endif
-                                    @if (Auth::user()->canAccessMenu('laporan.pengurangan'))
+                                    @if (Auth::user()->canAccessMenu('laporan.pengurangan') || Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('laporan.pengurangan') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Laporan Pengurangan</a>
+                                            <a href="{{ route('laporan.pengurangan') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('laporan.pengurangan')) bg-gray-200 @endif">Laporan Pengurangan</a>
+                                        </li>
+                                    @endif
+                                    
+                                    {{-- Menu Denda --}}
+                                    @if (Auth::user()->canAccessMenu('denda_administratif.create') || Auth::user()->isAdmin())
+                                        <li class="mb-2">
+                                            <a href="{{ route('denda_administratif.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('denda_administratif.create')) bg-gray-200 @endif">Penghapusan Denda</a>
+                                        </li>
+                                    @endif
+                                     @if (Auth::user()->canAccessMenu('denda_administratif.index') || Auth::user()->isAdmin())
+                                        <li class="mb-2">
+                                            <a href="{{ route('denda_administratif.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('denda_administratif.index')) bg-gray-200 @endif">Laporan Denda</a>
                                         </li>
                                     @endif
 
-                                    {{-- PERBAIKAN: Menu untuk Denda Administratif --}}
-                                    @if (Auth::user()->canAccessMenu('denda_administratif.create'))
+                                    {{-- Menu Pembatalan --}}
+                                    @if (Auth::user()->canAccessMenu('pembatalan.create') || Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('denda_administratif.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Penghapusan Denda</a>
+                                            <a href="{{ route('pembatalan.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('pembatalan.create')) bg-gray-200 @endif">Pembatalan SPPT</a>
                                         </li>
                                     @endif
-                                    @if (Auth::user()->canAccessMenu('denda_administratif.index'))
+                                     @if (Auth::user()->canAccessMenu('pembatalan.index') || Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('denda_administratif.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Laporan Denda</a>
+                                            <a href="{{ route('pembatalan.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('pembatalan.index')) bg-gray-200 @endif">Laporan Pembatalan</a>
                                         </li>
                                     @endif
-
+                                    
+                                    {{-- Menu Dafnom --}}
+                                    @if (Auth::user()->canAccessMenu('dafnom.create') || Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('dafnom.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Pembentukan Dafnom</a>
+                                            <a href="{{ route('dafnom.create') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('dafnom.create')) bg-gray-200 @endif">Pembentukan Dafnom</a>
                                         </li>
-
-                                    {{-- Menu untuk Manajemen User (Hanya untuk Admin) --}}
+                                    @endif
+                                    
+                                    {{-- Menu Manajemen User (Hanya Admin) --}}
                                     @if (Auth::user()->isAdmin())
                                         <li class="mb-2">
-                                            <a href="{{ route('users.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md">Manajemen User</a>
+                                            <a href="{{ route('users.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('users.index')) bg-gray-200 @endif">Manajemen User</a>
                                         </li>
                                     @endif
                                 @endauth

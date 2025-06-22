@@ -5,59 +5,21 @@
     body {
         font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
         margin: 20px;
-        font-size: 10px;
+        font-size: 9px;
     }
-    .header {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .header h1 {
-        margin: 0;
-        font-size: 20px;
-    }
-    .header p {
-        margin: 0;
-        font-size: 12px;
-    }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { margin: 0; font-size: 18px; }
+    .header p { margin: 0; font-size: 11px; }
     table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 15px;
-        font-size: 8px; /* Ukuran font dikecilkan sedikit untuk memuat lebih banyak */
+        font-size: 7px;
         table-layout: fixed;
     }
-    th, td {
-        border: 1px solid black;
-        padding: 4px; /* Padding disesuaikan */
-        text-align: left;
-        word-wrap: break-word;
-    }
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
-    
-    /* Lebar kolom yang disesuaikan agar lebih rapi */
-    th:nth-child(1), td:nth-child(1) { width: 10%; }   /* NOP */
-    th:nth-child(2), td:nth-child(2) { width: 4%; }   /* Tahun Pajak */
-    th:nth-child(3), td:nth-child(3) { width: 9%; }   /* Nama WP (diperlebar) */
-    th:nth-child(4), td:nth-child(4) { width: 13%; }  /* Alamat WP (diperlebar) */
-    th:nth-child(5), td:nth-child(5) { width: 13%; }  /* Letak OP (diperlebar) */
-    th:nth-child(6), td:nth-child(6) { width: 4%; }   /* Bumi */
-    th:nth-child(7), td:nth-child(7) { width: 4%; }   /* Bangunan */
-    th:nth-child(8), td:nth-child(8) { width: 6%; }   /* Baku */
-    th:nth-child(9), td:nth-child(9) { width: 5%; }   /* Pengurangan (%) */
-    th:nth-child(10), td:nth-child(10) { width: 6%; } /* Jumlah Pengurangan */
-    th:nth-child(11), td:nth-child(11) { width: 7%; } /* Ketetapan */
-    th:nth-child(12), td:nth-child(12) { width: 9%; } /* No SK (diperlebar) */
-    th:nth-child(13), td:nth-child(13) { width: 5%; } /* Tgl SK */
-    th:nth-child(14), td:nth-child(14) { width: 6%; } /* Tgl Proses (dipersempit) */
-
-    .footer {
-        text-align: right;
-        margin-top: 20px;
-        font-size: 10px;
-    }
+    th, td { border: 1px solid black; padding: 3px; text-align: left; word-wrap: break-word; }
+    th { background-color: #f2f2f2; font-weight: bold; }
+    .footer { text-align: right; margin-top: 20px; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -69,46 +31,45 @@
     <table>
         <thead>
             <tr>
-                <th>NOP</th>
-                <th>Tahun Pajak</th>
-                <th>Nama WP</th>
-                <th>Alamat WP</th>
-                <th>Letak OP</th>
-                <th>Bumi</th>
-                <th>Bangunan</th>
-                <th>Baku</th>
-                <th>Pengurangan (%)</th>
-                <th>Jumlah Pengurangan</th>
-                <th>Ketetapan Yang Harus Dibayar</th>
-                <th>Nomor SK</th>
-                <th>Tanggal SK</th>
-                <th>Tanggal Proses</th>
+                <th style="width: 9%;">NOP</th>
+                <th style="width: 4%;">Tahun</th>
+                <th style="width: 7%;">Nama WP</th>
+                <th style="width: 10%;">Alamat WP</th>
+                <th style="width: 10%;">Letak OP</th>
+                <th style="width: 4%;">Bumi</th>
+                <th style="width: 4%;">Bangunan</th>
+                <th style="width: 5%;">Baku</th>
+                <th style="width: 7.5%;">Jenis Pengurangan</th>
+                <th style="width: 5%;">Pengurangan (%)</th>
+                <th style="width: 5.5%;">Jml Pengurangan</th>
+                <th style="width: 6%;">Ketetapan</th>
+                <th style="width: 7%;">Nomor SK</th>
+                <th style="width: 5%;">Tanggal SK</th>
+                <th style="width: 6%;">Tanggal Proses</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($dataLaporan as $data)
                 <tr>
-                    <td>
-                        {{-- PERBAIKAN: Langsung tampilkan formatted_nop dari Controller --}}
-                        {{ $data->formatted_nop }}
-                    </td>
+                    <td>{{ $data->formatted_nop ?? ($data->kd_propinsi . '.' . $data->kd_dati2 . '.' . $data->kd_kecamatan . '.' . $data->kd_kelurahan . '.' . $data->kd_blok . '-' . $data->no_urut . '.' . $data->kd_jns_op) }}</td>
                     <td>{{ $data->thn_pajak_sppt }}</td>
                     <td>{{ $data->nm_wp_sppt ?? '-' }}</td>
                     <td>{{ $data->alamat_wp ?? '-' }}</td>
                     <td>{{ $data->letak_op ?? '-' }}</td>
                     <td>{{ number_format($data->luas_bumi_sppt ?? 0, 0, ',', '.') }}</td>
                     <td>{{ number_format($data->luas_bng_sppt ?? 0, 0, ',', '.') }}</td>
-                    <td>{{ number_format($data->pbb_terhutang_sppt_lama ?? 0, 2, ',', '.') }}</td>
+                    <td>{{ number_format($data->pbb_terhutang_sppt_lama ?? 0, 0, ',', '.') }}</td>
+                    <td>{{ $data->jenis_pengurangan ?? '-' }}</td>
                     <td>{{ number_format($data->persentase ?? 0, 2, ',', '.') }}%</td>
-                    <td>{{ number_format($data->jumlah_pengurangan_baru ?? 0, 2, ',', '.') }}</td>
-                    <td>{{ number_format($data->ketetapan_baru ?? 0, 2, ',', '.') }}</td>
+                    <td>{{ number_format($data->jumlah_pengurangan_baru ?? 0, 0, ',', '.') }}</td>
+                    <td>{{ number_format($data->ketetapan_baru ?? 0, 0, ',', '.') }}</td>
                     <td>{{ $data->no_sk_pengurangan ?? '-' }}</td>
                     <td>{{ $data->tgl_sk_pengurangan ? \Carbon\Carbon::parse($data->tgl_sk_pengurangan)->format('d-m-Y') : '-' }}</td>
                     <td>{{ $data->created_at->format('d-m-Y H:i:s') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="14" style="text-align: center;">Tidak ada data pengurangan yang tercatat.</td>
+                    <td colspan="15" style="text-align: center;">Tidak ada data pengurangan yang tercatat.</td>
                 </tr>
             @endforelse
         </tbody>

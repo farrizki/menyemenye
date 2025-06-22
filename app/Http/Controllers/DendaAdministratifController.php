@@ -680,5 +680,14 @@ class DendaAdministratifController extends Controller
     $fileName = 'denda_sppt_' . str_replace('.', '', $denda->formatted_nop) . '_' . $denda->thn_pajak_sppt . '.pdf';
 
     return $pdf->download($fileName);
+    
+}
+public function edit(int $id)
+{
+    // Cari data denda berdasarkan ID, jika tidak ketemu akan error 404
+    $denda = DendaAdministratif::findOrFail($id);
+
+    // Kirim data ke view. View 'denda_administratif.edit' sudah Anda buat.
+    return view('denda_administratif.edit', compact('denda'));
 }
 }
