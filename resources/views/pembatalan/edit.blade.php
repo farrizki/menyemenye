@@ -21,9 +21,9 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('pembatalan.update', $pembatalan->id) }}" method="POST" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('pembatalan.preview.update', $pembatalan->id) }}" enctype="multipart/form-data">
                         @csrf
-                        @method('PATCH')
+                        
 
                         <div class="mb-4">
                             <x-input-label for="nomor_sk" :value="__('Nomor SK')" />

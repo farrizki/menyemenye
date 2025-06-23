@@ -30,9 +30,9 @@
                         </div>
                     <?php endif; ?>
 
-                    <form action="<?php echo e(route('pembatalan.update', $pembatalan->id)); ?>" method="POST" enctype="multipart/form-data">
+                    <form method="POST" action="<?php echo e(route('pembatalan.preview.update', $pembatalan->id)); ?>" enctype="multipart/form-data">
                         <?php echo csrf_field(); ?>
-                        <?php echo method_field('PATCH'); ?>
+                        
 
                         <div class="mb-4">
                             <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>

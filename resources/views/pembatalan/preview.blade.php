@@ -1,7 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Pratinjau Pembatalan SPPT') }}
+            @if(isset($isEdit) && $isEdit)
+                {{ __('Pratinjau Perubahan Pembatalan') }}
+            @else
+                {{ __('Pratinjau Pembatalan SPPT') }}
+            @endif
         </h2>
     </x-slot>
 
@@ -9,7 +13,18 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-xl font-bold mb-4">Konfirmasi Pembatalan SPPT</h3>
+                    <h3 class="text-xl font-bold mb-4">
+                        @if(isset($isEdit) && $isEdit)
+                            Konfirmasi Perubahan Data
+                        @else
+                            Konfirmasi Pembatalan SPPT
+                        @endif
+                    </h3>
+
+                    {{-- Variabel data diambil tergantung dari proses (create atau edit) --}}
+                    @php
+                        $dataSource = isset($isEdit) ? $editPreview['data'] : $preview['data'];
+                    @endphp
 
                     {{-- Tabel data yang akan diproses --}}
                     <div class="overflow-x-auto border rounded-lg">
@@ -29,12 +44,13 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($preview['data'] as $item)
+                                @forelse ($dataSource as $item)
                                     @php
                                         $rowClass = '';
                                         if ($item['status'] == 'Gagal') $rowClass = 'bg-red-50';
                                         if ($item['status'] == 'Lunas') $rowClass = 'bg-yellow-50';
                                         if ($item['status'] == 'Siap Diproses') $rowClass = 'bg-blue-50';
+                                        if ($item['status'] == 'Akan Diperbarui') $rowClass = 'bg-green-50'; // Warna untuk edit
                                     @endphp
                                     <tr class="{{ $rowClass }}">
                                         <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $item['formatted_nop'] }}</td>
@@ -50,6 +66,7 @@
                                                 @if($item['status'] == 'Gagal') bg-red-100 text-red-800 @endif
                                                 @if($item['status'] == 'Lunas') bg-yellow-100 text-yellow-800 @endif
                                                 @if($item['status'] == 'Siap Diproses') bg-blue-100 text-blue-800 @endif
+                                                @if($item['status'] == 'Akan Diperbarui') bg-green-100 text-green-800 @endif
                                             ">
                                                 {{ $item['status'] }}
                                             </span>
@@ -64,6 +81,27 @@
                     </div>
                     
                     <div class="mt-6 border-t pt-4">
+                        {{-- Bagian detail SK (lama vs baru) hanya untuk EDIT --}}
+                        @if(isset($isEdit) && $isEdit)
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                            <div class="p-4 border rounded-lg bg-gray-50">
+                                <p class="font-semibold">Detail SK Lama:</p>
+                                <ul class="list-disc list-inside ml-2 mt-1">
+                                    <li><strong>Nomor SK:</strong> {{ $existingData->no_sk }}</li>
+                                    <li><strong>Tanggal SK:</strong> {{ $existingData->tgl_sk->format('d-m-Y') }}</li>
+                                </ul>
+                            </div>
+                             <div class="p-4 border rounded-lg bg-green-50 border-green-300">
+                                <p class="font-semibold">Detail Perubahan:</p>
+                                <ul class="list-disc list-inside ml-2 mt-1">
+                                    <li><strong>Nomor SK Baru:</strong> {{ $newSkDetails['no_sk'] }}</li>
+                                    <li><strong>Tanggal SK Baru:</strong> {{ \Carbon\Carbon::parse($newSkDetails['tgl_sk'])->format('d-m-Y') }}</li>
+                                    <li><strong>Berkas Baru:</strong> {{ session()->has('berkas_temp_path_update') ? 'File baru telah diunggah' : 'Tidak ada perubahan berkas' }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        @else
+                        {{-- Bagian detail SK dan ringkasan untuk CREATE --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
                             <div class="p-4 border rounded-lg bg-gray-50">
                                 <p class="font-semibold">Detail SK Pembatalan:</p>
@@ -73,7 +111,7 @@
                                     <li><strong>Keterangan:</strong> "{{ $preview['keterangan'] }}"</li>
                                 </ul>
                             </div>
-                             <div class="p-4 border rounded-lg bg-blue-50 border-blue-300">
+                               <div class="p-4 border rounded-lg bg-blue-50 border-blue-300">
                                 @php
                                     $collection = collect($preview['data']);
                                     $siapCount = $collection->where('status', 'Siap Diproses')->count();
@@ -90,19 +128,31 @@
                                 </ul>
                             </div>
                         </div>
+                        @endif
                     </div>
 
                     <div class="flex justify-end mt-6">
-                        <a href="{{ route('pembatalan.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 mr-2">
+                        <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 mr-2">
                             Kembali
                         </a>
-                        @if(collect($preview['data'])->contains(fn($i) => in_array($i['status'], ['Siap Diproses', 'Lunas'])))
-                        <form action="{{ route('pembatalan.store') }}" method="POST">
-                            @csrf
-                            <x-primary-button>
-                                {{ __('Konfirmasi & Simpan Pembatalan') }}
-                            </x-primary-button>
-                        </form>
+                        
+                        {{-- Logika untuk tombol Simpan --}}
+                        @if(isset($isEdit) && $isEdit)
+                            <form action="{{ route('pembatalan.update', $existingData->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="no_sk" value="{{ $newSkDetails['no_sk'] }}">
+                                <input type="hidden" name="tgl_sk" value="{{ $newSkDetails['tgl_sk'] }}">
+                                <input type="hidden" name="keterangan_pembatalan" value="{{ $newSkDetails['keterangan'] }}">
+                                <x-primary-button>{{ __('Konfirmasi & Simpan Perubahan') }}</x-primary-button>
+                            </form>
+                        @else
+                            @if(collect($preview['data'])->contains(fn($i) => in_array($i['status'], ['Siap Diproses', 'Lunas'])))
+                            <form action="{{ route('pembatalan.store') }}" method="POST">
+                                @csrf
+                                <x-primary-button>{{ __('Konfirmasi & Simpan Pembatalan') }}</x-primary-button>
+                            </form>
+                            @endif
                         @endif
                     </div>
                 </div>
