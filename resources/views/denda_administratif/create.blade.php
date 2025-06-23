@@ -11,12 +11,6 @@
                 <div class="p-6 text-gray-900">
                     <h3 class="text-xl font-bold mb-4">Form Penghapusan Denda Administratif</h3>
 
-                    @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
-
                     @if ($errors->any())
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                             <ul class="list-disc pl-5">
@@ -30,96 +24,85 @@
                     <form action="{{ route('denda_administratif.preview') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Pilihan Input NOP --}}
-                        <div class="mb-4">
-                            <x-input-label for="input_type" :value="__('Cara Input NOP')" />
-                            <select id="input_type" name="input_type" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" onchange="toggleNopInput()">
-                                <option value="nop_manual" {{ old('input_type') == 'nop_manual' ? 'selected' : '' }}>Input NOP Manual</option>
-                                <option value="upload_excel" {{ old('input_type') == 'upload_excel' ? 'selected' : '' }}>Upload File Excel</option>
-                                <option value="satu_desa" {{ old('input_type') == 'satu_desa' ? 'selected' : '' }}>Satu Desa</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('input_type')" class="mt-2" />
-                        </div>
-
-                        {{-- Input NOP Manual (Conditional) --}}
-                        <div class="mb-4" id="nop_manual_section" style="display: {{ old('input_type', 'nop_manual') == 'nop_manual' ? 'block' : 'none' }}">
-                            <x-input-label for="nop_manual" :value="__('NOP (Pisahkan dengan koma)')" />
-                            <x-text-input id="nop_manual" class="block mt-1 w-full" type="text" name="nop_manual" :value="old('nop_manual')" placeholder="Contoh: 351814001000802040,351814001101004020" />
-                            <x-input-error :messages="$errors->get('nop_manual')" class="mt-2" />
-                        </div>
-
-                        {{-- Upload File Excel (Conditional) --}}
-                        <div class="mb-4" id="upload_excel_section" style="display: {{ old('input_type') == 'upload_excel' ? 'block' : 'none' }}">
-                            <x-input-label for="excel_file" :value="__('Upload File Excel (NOP & Tahun Pajak di kolom A & B)')" />
-                            <input id="excel_file" class="block mt-1 w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" type="file" name="excel_file" accept=".xls,.xlsx" />
-                            <x-input-error :messages="$errors->get('excel_file')" class="mt-2" />
-                        </div>
-
-                        {{-- Satu Desa (Conditional) --}}
-                        <div class="mb-4" id="satu_desa_section" style="display: {{ old('input_type') == 'satu_desa' ? 'block' : 'none' }}">
-                            <x-input-label for="kd_kecamatan_desa" :value="__('Kecamatan')" />
-                            <select id="kd_kecamatan_desa" name="kd_kecamatan_desa" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" onchange="getKelurahanByKecamatan()">
-                                <option value="">Pilih Kecamatan</option>
-                                @foreach($kecamatans as $kecamatan)
-                                    <option value="{{ $kecamatan->kd_kecamatan }}" {{ old('kd_kecamatan_desa') == $kecamatan->kd_kecamatan ? 'selected' : '' }}>
-                                        {{ $kecamatan->nm_kecamatan }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('kd_kecamatan_desa')" class="mt-2" />
-
-                            <div class="mt-4">
-                                <x-input-label for="kd_kelurahan_desa" :value="__('Kelurahan/Desa')" />
-                                <select id="kd_kelurahan_desa" name="kd_kelurahan_desa" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Pilih Kelurahan/Desa</option>
-                                    {{-- Opsi kelurahan akan diisi via AJAX --}}
+                        {{-- Grup Input NOP --}}
+                        <div class="border p-4 rounded-md mb-6">
+                            <h4 class="font-semibold text-lg mb-4 border-b pb-2">1. Pilih Objek Pajak</h4>
+                            <div class="mb-4">
+                                <x-input-label for="input_type" :value="__('Cara Input NOP')" />
+                                <select id="input_type" name="input_type" class="block mt-1 w-full rounded-md shadow-sm border-gray-300" onchange="toggleNopInput()">
+                                    <option value="nop_manual" @if(old('input_type', 'nop_manual') == 'nop_manual') selected @endif>Input NOP Manual</option>
+                                    <option value="upload_excel" @if(old('input_type') == 'upload_excel') selected @endif>Upload File Excel</option>
+                                    <option value="satu_desa" @if(old('input_type') == 'satu_desa') selected @endif>Satu Desa</option>
                                 </select>
-                                <x-input-error :messages="$errors->get('kd_kelurahan_desa')" class="mt-2" />
+                            </div>
+
+                            <div id="nop_manual_section">
+                                <x-input-label for="nop_manual" :value="__('NOP (Pisahkan dengan koma)')" />
+                                <x-text-input id="nop_manual" class="block mt-1 w-full" type="text" name="nop_manual" :value="old('nop_manual')" placeholder="Contoh: 351814001000802040,351814001101004020" />
+                            </div>
+
+                            <div id="upload_excel_section" class="mb-4" style="display: none;">
+                                <x-input-label for="excel_file" :value="__('Upload File Excel (Kolom A: NOP, Kolom B: Tahun Pajak)')" />
+                                <input id="excel_file" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="excel_file" accept=".xls,.xlsx" />
+                            </div>
+
+                            <div id="satu_desa_section" style="display: none;">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <x-input-label for="kd_kecamatan_desa" :value="__('Kecamatan')" />
+                                        <select id="kd_kecamatan_desa" name="kd_kecamatan_desa" class="block mt-1 w-full rounded-md shadow-sm border-gray-300" onchange="getKelurahanByKecamatan()">
+                                            <option value="">Pilih Kecamatan</option>
+                                            @foreach($kecamatans as $kecamatan)
+                                                <option value="{{ $kecamatan->kd_kecamatan }}" @if(old('kd_kecamatan_desa') == $kecamatan->kd_kecamatan) selected @endif>{{ $kecamatan->nm_kecamatan }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="kd_kelurahan_desa" :value="__('Kelurahan/Desa')" />
+                                        <select id="kd_kelurahan_desa" name="kd_kelurahan_desa" class="block mt-1 w-full rounded-md shadow-sm border-gray-300">
+                                            <option value="">Pilih Kelurahan/Desa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4" id="thn_pajak_input_section">
+                                <x-input-label for="thn_pajak_input" :value="__('Tahun Pajak (Pisahkan dengan koma jika lebih dari 1 tahun)')" />
+                                <x-text-input id="thn_pajak_input" class="block mt-1 w-full" type="text" name="thn_pajak_input" :value="old('thn_pajak_input', \Carbon\Carbon::now()->year)" placeholder="Contoh: 2023,2024,2025" />
+                            </div>
+
+                            <div class="mb-4">
+                                <x-input-label for="tgl_jatuh_tempo_baru" :value="__('Tanggal Jatuh Tempo Baru')" />
+                                <x-text-input id="tgl_jatuh_tempo_baru" class="block mt-1 w-full" type="date" name="tgl_jatuh_tempo_baru" :value="old('tgl_jatuh_tempo_baru')" required />
                             </div>
                         </div>
 
-                        {{-- Input Tahun Pajak (Opsional, tergantung input_type) --}}
-                        <div class="mb-4" id="thn_pajak_input_section" style="display: {{ old('input_type', 'nop_manual') == 'upload_excel' ? 'none' : 'block' }}">
-                            <x-input-label for="thn_pajak_input" :value="__('Tahun Pajak (Pisahkan dengan koma jika lebih dari 1 tahun)')" />
-                            <x-text-input id="thn_pajak_input" class="block mt-1 w-full" type="text" name="thn_pajak_input" :value="old('thn_pajak_input', \Carbon\Carbon::now()->year)" placeholder="Contoh: 2023,2024,2025" />
-                            <x-input-error :messages="$errors->get('thn_pajak_input')" class="mt-2" />
-                        </div>
-
-                        {{-- Tanggal Jatuh Tempo Baru --}}
-                        <div class="mb-4">
-                            <x-input-label for="tgl_jatuh_tempo_baru" :value="__('Tanggal Jatuh Tempo Baru')" />
-                            <x-text-input id="tgl_jatuh_tempo_baru" class="block mt-1 w-full" type="date" name="tgl_jatuh_tempo_baru" :value="old('tgl_jatuh_tempo_baru')" required />
-                            <x-input-error :messages="$errors->get('tgl_jatuh_tempo_baru')" class="mt-2" />
-                        </div>
-
-                        {{-- No SK, Tahun SK, Tanggal SK, Upload Berkas --}}
-                        <div class="mb-4">
-                            <x-input-label for="nomor_sk" :value="__('Nomor SK')" />
-                            <x-text-input id="nomor_sk" class="block mt-1 w-full" type="text" name="nomor_sk" :value="old('nomor_sk')" required />
-                            <x-input-error :messages="$errors->get('nomor_sk')" class="mt-2" />
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="tahun_sk" :value="__('Tahun SK')" />
-                            <x-text-input id="tahun_sk" class="block mt-1 w-full" type="number" name="tahun_sk" :value="old('tahun_sk', \Carbon\Carbon::now()->year)" required min="2000" max="2100" />
-                            <x-input-error :messages="$errors->get('tahun_sk')" class="mt-2" />
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="tgl_sk" :value="__('Tanggal SK')" />
-                            <x-text-input id="tgl_sk" class="block mt-1 w-full" type="date" name="tgl_sk" :value="old('tgl_sk')" required />
-                            <x-input-error :messages="$errors->get('tgl_sk')" class="mt-2" />
-                        </div>
-
-                        <div class="mb-4">
-                            <x-input-label for="berkas" :value="__('Upload Berkas (PDF, Max 24MB)')" />
-                            <input id="berkas" class="block mt-1 w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm" type="file" name="berkas" accept="application/pdf" required />
-                            <x-input-error :messages="$errors->get('berkas')" class="mt-2" />
+                        {{-- Grup Informasi SK --}}
+                        <div class="border p-4 rounded-md mb-6">
+                            <h4 class="font-semibold text-lg mb-4 border-b pb-2">2. Informasi SK & Berkas</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label for="nomor_sk" :value="__('Nomor SK')" />
+                                    <x-text-input id="nomor_sk" class="block mt-1 w-full" type="text" name="nomor_sk" :value="old('nomor_sk')" required />
+                                </div>
+                                <div>
+                                    <x-input-label for="tahun_sk" :value="__('Tahun SK')" />
+                                    <x-text-input id="tahun_sk" class="block mt-1 w-full" type="number" name="tahun_sk" :value="old('tahun_sk', \Carbon\Carbon::now()->year)" required min="2000" max="2100" />
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <x-input-label for="tgl_sk" :value="__('Tanggal SK')" />
+                                <x-text-input id="tgl_sk" class="block mt-1 w-full" type="date" name="tgl_sk" :value="old('tgl_sk')" required />
+                            </div>
+                            <div class="mt-4">
+                                <x-input-label for="berkas" :value="__('Upload Berkas (PDF, Max 24MB)')" />
+                                <input id="berkas" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="berkas" accept="application/pdf" required />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button>
-                                {{ __('Proses Penghapusan Denda') }}
+                                {{ __('Lanjutkan ke Pratinjau') }}
                             </x-primary-button>
                         </div>
                     </form>
