@@ -275,7 +275,8 @@ class PenguranganController extends Controller
         $fileNameBase = 'laporan_pengurangan_' . now()->format('Ymd_His');
 
         if ($request->input('format') === 'pdf') {
-            $pdf = PDF::loadView('pengurangan.laporan_pdf', compact('dataLaporan'))->setPaper('a4', 'landscape');
+            $f4LandscapeCustomPaper = array(0, 0, 935.433, 609.448);
+            $pdf = PDF::loadView('pengurangan.laporan_pdf', compact('dataLaporan'))->setPaper($f4LandscapeCustomPaper);
             return $pdf->download($fileNameBase . '.pdf');
         } elseif ($request->input('format') === 'excel') {
             $spreadsheet = new Spreadsheet();
@@ -300,7 +301,8 @@ class PenguranganController extends Controller
             $item->formatted_nop = $this->formatNop($item->kd_propinsi . $item->kd_dati2 . $item->kd_kecamatan . $item->kd_kelurahan . $item->kd_blok . $item->no_urut . $item->kd_jns_op);
             return $item;
         });
-        $pdf = PDF::loadView('pengurangan.laporan_pdf', compact('dataLaporan'))->setPaper('a4', 'landscape');
+        $f4LandscapeCustomPaper = array(0, 0, 935.433, 609.448);
+        $pdf = PDF::loadView('pengurangan.laporan_pdf', compact('dataLaporan'))->setPaper($f4LandscapeCustomPaper);
         return $pdf->download('pengurangan_' . $dataLaporan->first()->formatted_nop . '_' . now()->format('Ymd_His') . '.pdf');
     }
 

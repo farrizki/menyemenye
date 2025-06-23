@@ -293,7 +293,7 @@ class DendaAdministratifController extends Controller
         $dataLaporan = collect([$denda]);
         $f4LandscapeCustomPaper = array(0, 0, 935.433, 609.448);
         $pdf = PDF::loadView('denda_administratif.laporan_pdf', compact('dataLaporan'))->setPaper($f4LandscapeCustomPaper);
-        return $pdf->download('denda_sppt_' . str_replace('.', '', $denda->formatted_nop) . '_' . $denda->thn_pajak_sppt . '.pdf');
+        return $pdf->download('denda_sppt_' . $denda->first()->formatted_nop . '_' . now()->format('Ymd_His') . '.pdf');
     }
     
     protected function formatNop(string $nopRaw): string
