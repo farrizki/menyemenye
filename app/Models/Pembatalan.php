@@ -15,6 +15,10 @@ class Pembatalan extends Model
     // Izinkan semua kolom untuk diisi secara massal
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'tgl_sk' => 'datetime', // <-- TAMBAHKAN BARIS INI
+    ];
+
     // Accessor untuk memformat NOP agar mudah dibaca di laporan
     public function getFormattedNopAttribute()
     {

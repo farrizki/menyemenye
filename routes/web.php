@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\PenguranganController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DendaAdministratifController;
-use App\Models\RefKecamatan; // Pastikan ini diimpor jika filter-pdf menggunakan ini
+use App\Http\Controllers\DafnomController; // Ditambahkan untuk konsistensi
+use App\Http\Controllers\PembatalanController; // == BARIS INI YANG PALING PENTING ==
+use App\Models\RefKecamatan;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,18 +94,17 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('pembatalan-sppt')->name('pembatalan.')->group(function () {
-        Route::get('/create', [\App\Http\Controllers\PembatalanController::class, 'create'])->name('create');
-        Route::post('/preview', [\App\Http\Controllers\PembatalanController::class, 'preview'])->name('preview');
-        Route::post('/store', [\App\Http\Controllers\PembatalanController::class, 'store'])->name('store');
-        Route::get('/laporan', [\App\Http\Controllers\PembatalanController::class, 'index'])->name('index');
-        Route::get('/{pembatalan}/edit', [\App\Http\Controllers\PembatalanController::class, 'edit'])->name('edit');
-        Route::patch('/{pembatalan}', [\App\Http\Controllers\PembatalanController::class, 'update'])->name('update');
-        Route::post('pembatalan/{pembatalan}/preview-update', [PembatalanController::class, 'previewUpdate'])->name('pembatalan.preview.update');
-        Route::delete('/{pembatalan}', [\App\Http\Controllers\PembatalanController::class, 'destroy'])->name('destroy');
-        Route::get('/{pembatalan}/cetak-pdf', [\App\Http\Controllers\PembatalanController::class, 'cetakSinglePdf'])->name('cetak-single-pdf');
-        Route::get('/filter-cetak-pdf', [\App\Http\Controllers\PembatalanController::class, 'showFilterCetakPdfForm'])->name('filter-cetak-pdf');
-        Route::get('/cetak-pdf-filtered', [\App\Http\Controllers\PembatalanController::class, 'cetakFilteredPdf'])->name('cetak-pdf-filtered');
-        
+        Route::get('/create', [PembatalanController::class, 'create'])->name('create');
+        Route::post('/preview', [PembatalanController::class, 'preview'])->name('preview');
+        Route::post('/store', [PembatalanController::class, 'store'])->name('store');
+        Route::get('/laporan', [PembatalanController::class, 'index'])->name('index');
+        Route::get('/{pembatalan}/edit', [PembatalanController::class, 'edit'])->name('edit');
+        Route::post('/{pembatalan}/preview-update', [PembatalanController::class, 'previewUpdate'])->name('preview.update');
+        Route::put('/{pembatalan}', [PembatalanController::class, 'update'])->name('update');
+        Route::delete('/{pembatalan}', [PembatalanController::class, 'destroy'])->name('destroy');
+        Route::get('/{pembatalan}/cetak-pdf', [PembatalanController::class, 'cetakSinglePdf'])->name('cetak-single-pdf');
+        Route::get('/filter-cetak-pdf', [PembatalanController::class, 'showFilterCetakPdfForm'])->name('filter-cetak-pdf');
+        Route::get('/cetak-pdf-filtered', [PembatalanController::class, 'cetakFilteredPdf'])->name('cetak-pdf-filtered');
     });
 });
 
