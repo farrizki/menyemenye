@@ -75,6 +75,16 @@
                                             <a href="{{ route('pembatalan.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('pembatalan.index')) bg-gray-200 @endif">Laporan Pembatalan</a>
                                         </li>
                                     @endif
+                                    @if (Auth::user()->canAccessMenu('penggabungan.create') || Auth::user()->isAdmin())
+                                        <li class="mb-2">
+                                            <a href="{{ route('penggabungan.create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('penggabungan.create')) bg-gray-200 font-semibold @endif">Penggabungan SPPT</a>
+                                        </li>
+                                    @endif
+                                    @if (Auth::user()->canAccessMenu('penggabungan.index') || Auth::user()->isAdmin())
+                                        <li class="mb-2">
+                                            <a href="{{ route('penggabungan.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md @if(request()->routeIs('penggabungan.index')) bg-gray-200 font-semibold @endif">Laporan Penggabungan</a>
+                                        </li>
+                                    @endif
                                     
                                     {{-- Menu Dafnom --}}
                                     @if (Auth::user()->canAccessMenu('dafnom.create') || Auth::user()->isAdmin())

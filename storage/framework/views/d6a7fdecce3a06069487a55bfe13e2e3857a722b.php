@@ -76,6 +76,16 @@
                                             <a href="<?php echo e(route('pembatalan.index')); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('pembatalan.index')): ?> bg-gray-200 <?php endif; ?>">Laporan Pembatalan</a>
                                         </li>
                                     <?php endif; ?>
+                                    <?php if(Auth::user()->canAccessMenu('penggabungan.create') || Auth::user()->isAdmin()): ?>
+                                        <li class="mb-2">
+                                            <a href="<?php echo e(route('penggabungan.create')); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('penggabungan.create')): ?> bg-gray-200 font-semibold <?php endif; ?>">Penggabungan SPPT</a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if(Auth::user()->canAccessMenu('penggabungan.index') || Auth::user()->isAdmin()): ?>
+                                        <li class="mb-2">
+                                            <a href="<?php echo e(route('penggabungan.index')); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md <?php if(request()->routeIs('penggabungan.index')): ?> bg-gray-200 font-semibold <?php endif; ?>">Laporan Penggabungan</a>
+                                        </li>
+                                    <?php endif; ?>
                                     
                                     
                                     <?php if(Auth::user()->canAccessMenu('dafnom.create') || Auth::user()->isAdmin()): ?>

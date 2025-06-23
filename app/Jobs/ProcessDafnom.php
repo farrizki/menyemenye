@@ -33,7 +33,6 @@ class ProcessDafnom implements ShouldQueue
      */
     public function handle()
     {
-        // Ambil semua data yang dibutuhkan dari log
         $log = LogDafnom::findOrFail($this->logId);
         $log->update(['status' => 'processing', 'message' => 'Memulai proses...']);
 
@@ -59,11 +58,11 @@ class ProcessDafnom implements ShouldQueue
                     'SPPT.KD_BLOK', 'SPPT.NO_URUT', 'SPPT.KD_JNS_OP',
                     'DAT_OBJEK_PAJAK.JALAN_OP', 'DAT_OBJEK_PAJAK.BLOK_KAV_NO_OP', 
                     'DAT_OBJEK_PAJAK.RW_OP', 'DAT_OBJEK_PAJAK.RT_OP',
-                    DB::raw("'1' as JNS_BUMI"),
+                    'DAT_OBJEK_PAJAK.JNS_TRANSAKSI_OP as JNS_BUMI',
                     'DAT_OP_BANGUNAN.KD_JPB',
-                    'SPPT.STATUS_PEMBAYARAN_SPPT as KD_STATUS_WP', // Menggunakan kolom dari SPPT, sesuaikan jika perlu
-                    DB::raw("'4' as KATEGORI_OP"), // <<< PERBAIKAN: Nilai default diubah menjadi 4
-                    'SPPT.NM_WP_SPPT as KETERANGAN',
+                    'DAT_OBJEK_PAJAK.KD_STATUS_WP',
+                    DB::raw("'4' as KATEGORI_OP"),
+                    DB::raw("'' as KETERANGAN"),
                     DB::raw("'" . ($log->no_formulir ?? '') . "' as NO_FORMULIR"),
                     DB::raw("SYSDATE as TGL_PEMBENTUKAN"),
                     DB::raw("'" . $log->user_nip . "' as NIP_PEMBENTUK"),
@@ -92,20 +91,23 @@ class ProcessDafnom implements ShouldQueue
                 })
                 ->where('SPPT.THN_PAJAK_SPPT', $tahun);
             
+            // <<< TAMBAHAN: Filter berdasarkan status pembayaran SPPT >>>
+            $baseQuery->whereIn('SPPT.STATUS_PEMBAYARAN_SPPT', [0, 1]);
+
             if ($log->kd_kecamatan) $baseQuery->where('SPPT.KD_KECAMATAN', $log->kd_kecamatan);
             if ($log->kd_kelurahan) $baseQuery->where('SPPT.KD_KELURAHAN', $log->kd_kelurahan);
 
             if ($metode === 'susulan') {
                 $baseQuery->whereNotExists(function ($query) use ($tahun) {
                     $query->select(DB::raw(1))->from('DAFNOM_OP')
-                          ->where('THN_PEMBENTUKAN', $tahun)
-                          ->whereRaw('DAFNOM_OP.KD_PROPINSI = SPPT.KD_PROPINSI')
-                          ->whereRaw('DAFNOM_OP.KD_DATI2 = SPPT.KD_DATI2')
-                          ->whereRaw('DAFNOM_OP.KD_KECAMATAN = SPPT.KD_KECAMATAN')
-                          ->whereRaw('DAFNOM_OP.KD_KELURAHAN = SPPT.KD_KELURAHAN')
-                          ->whereRaw('DAFNOM_OP.KD_BLOK = SPPT.KD_BLOK')
-                          ->whereRaw('DAFNOM_OP.NO_URUT = SPPT.NO_URUT')
-                          ->whereRaw('DAFNOM_OP.KD_JNS_OP = SPPT.KD_JNS_OP');
+                        ->where('THN_PEMBENTUKAN', $tahun)
+                        ->whereRaw('DAFNOM_OP.KD_PROPINSI = SPPT.KD_PROPINSI')
+                        ->whereRaw('DAFNOM_OP.KD_DATI2 = SPPT.KD_DATI2')
+                        ->whereRaw('DAFNOM_OP.KD_KECAMATAN = SPPT.KD_KECAMATAN')
+                        ->whereRaw('DAFNOM_OP.KD_KELURAHAN = SPPT.KD_KELURAHAN')
+                        ->whereRaw('DAFNOM_OP.KD_BLOK = SPPT.KD_BLOK')
+                        ->whereRaw('DAFNOM_OP.NO_URUT = SPPT.NO_URUT')
+                        ->whereRaw('DAFNOM_OP.KD_JNS_OP = SPPT.KD_JNS_OP');
                 });
             }
             
