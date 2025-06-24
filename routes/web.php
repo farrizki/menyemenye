@@ -108,11 +108,16 @@ Route::middleware('auth')->group(function () {
     });
     Route::prefix('penggabungan-sppt')->name('penggabungan.')->group(function () {
         Route::get('/create', [App\Http\Controllers\PenggabunganController::class, 'create'])->name('create');
-        Route::post('/fetch-data', [App\Http\Controllers\PenggabunganController::class, 'fetchData'])->name('fetch-data'); // AJAX
+        Route::post('/fetch-data', [App\Http\Controllers\PenggabunganController::class, 'fetchData'])->name('fetch-data');
         Route::post('/preview', [App\Http\Controllers\PenggabunganController::class, 'preview'])->name('preview');
         Route::post('/store', [App\Http\Controllers\PenggabunganController::class, 'store'])->name('store');
         Route::get('/laporan', [App\Http\Controllers\PenggabunganController::class, 'index'])->name('index');
-        // Rute untuk edit dan delete bisa ditambahkan nanti jika diperlukan
+
+        // Fitur Laporan
+        Route::delete('/{penggabungan}', [App\Http\Controllers\PenggabunganController::class, 'destroy'])->name('destroy');
+        Route::get('/{penggabungan}/cetak-pdf', [App\Http\Controllers\PenggabunganController::class, 'cetakSinglePdf'])->name('cetak-single-pdf');
+        Route::get('/filter-cetak-pdf', [App\Http\Controllers\PenggabunganController::class, 'showFilterCetakPdfForm'])->name('filter-cetak-pdf');
+        Route::get('/cetak-pdf-filtered', [App\Http\Controllers\PenggabunganController::class, 'cetakFilteredPdf'])->name('cetak-pdf-filtered');
     });
 });
 

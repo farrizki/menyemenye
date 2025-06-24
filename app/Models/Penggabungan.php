@@ -17,10 +17,14 @@ class Penggabungan extends Model
     public function getFormattedNopAttribute()
     {
         $nop = $this->kd_propinsi . $this->kd_dati2 . $this->kd_kecamatan . $this->kd_kelurahan . $this->kd_blok . $this->no_urut . $this->kd_jns_op;
+        
         if (strlen($nop) == 18) {
-            // Menggunakan helper Str untuk menyisipkan titik
-            return Str::of($nop)->insert(2, '.')->insert(5, '.')->insert(9, '.')->insert(13, '.')->insert(17, '.')->insert(22, '.');
+            // PERBAIKAN: Menggunakan substr() yang lebih kompatibel
+            return substr($nop, 0, 2) . '.' . substr($nop, 2, 2) . '.' . substr($nop, 4, 3) . '.' .
+                   substr($nop, 7, 3) . '.' . substr($nop, 10, 3) . '.' . substr($nop, 13, 4) . '.' .
+                   substr($nop, 17, 1);
         }
+
         return $nop;
     }
 }

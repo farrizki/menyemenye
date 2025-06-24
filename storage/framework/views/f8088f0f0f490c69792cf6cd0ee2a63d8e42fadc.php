@@ -24,26 +24,42 @@
 
                         </div>
                     <?php endif; ?>
+                    <?php if($errors->any()): ?>
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                             <ul class="list-disc pl-5">
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($error); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
 
                     <h3 class="text-xl font-bold mb-4">Riwayat Penggabungan SPPT</h3>
 
-                    <div class="mb-4 flex items-center space-x-2">
-                        <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.text-input','data' => ['type' => 'text','id' => 'searchInput','placeholder' => 'Cari NOP/Nama/Tahun/Keterangan...','class' => 'w-full','value' => ''.e(request('search')).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.text-input','data' => ['type' => 'text','id' => 'searchInput','placeholder' => 'Cari NOP/Nama/Tahun/Keterangan...','class' => 'w-full md:w-80','value' => ''.e(request('search')).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('text-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'text','id' => 'searchInput','placeholder' => 'Cari NOP/Nama/Tahun/Keterangan...','class' => 'w-full','value' => ''.e(request('search')).'']); ?>
+<?php $component->withAttributes(['type' => 'text','id' => 'searchInput','placeholder' => 'Cari NOP/Nama/Tahun/Keterangan...','class' => 'w-full md:w-80','value' => ''.e(request('search')).'']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4)): ?>
 <?php $component = $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4; ?>
 <?php unset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4); ?>
 <?php endif; ?>
-                        <a href="<?php echo e(route('penggabungan.index')); ?>" id="resetButton" class="inline-flex items-center px-4 py-2 bg-gray-400 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-600 <?php echo e(request('search') ? '' : 'hidden'); ?>">Reset</a>
+                            <a href="<?php echo e(route('penggabungan.index')); ?>" id="resetButton" class="inline-flex items-center px-4 py-2 bg-gray-400 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-600 <?php echo e(request('search') ? '' : 'hidden'); ?>">Reset</a>
+                        </div>
+                        
+                        <a href="<?php echo e(route('penggabungan.filter-cetak-pdf')); ?>" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 whitespace-nowrap">
+                            Cetak Laporan
+                        </a>
                     </div>
 
                     <div id="laporanTableContainer">
@@ -54,6 +70,7 @@
         </div>
     </div>
     <?php $__env->startPush('scripts'); ?>
+        
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.getElementById('searchInput');
@@ -101,4 +118,5 @@
 <?php if (isset($__componentOriginal8e2ce59650f81721f93fef32250174d77c3531da)): ?>
 <?php $component = $__componentOriginal8e2ce59650f81721f93fef32250174d77c3531da; ?>
 <?php unset($__componentOriginal8e2ce59650f81721f93fef32250174d77c3531da); ?>
-<?php endif; ?><?php /**PATH D:\xampp\htdocs\aplikasi-final-sppt\resources\views/penggabungan/index.blade.php ENDPATH**/ ?>
+<?php endif; ?>
+<?php /**PATH D:\xampp\htdocs\aplikasi-final-sppt\resources\views/penggabungan/index.blade.php ENDPATH**/ ?>

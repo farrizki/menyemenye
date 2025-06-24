@@ -14,12 +14,28 @@
                             {{ session('success') }}
                         </div>
                     @endif
+                    @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                             <ul class="list-disc pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
 
                     <h3 class="text-xl font-bold mb-4">Riwayat Penggabungan SPPT</h3>
 
-                    <div class="mb-4 flex items-center space-x-2">
-                        <x-text-input type="text" id="searchInput" placeholder="Cari NOP/Nama/Tahun/Keterangan..." class="w-full" value="{{ request('search') }}" />
-                        <a href="{{ route('penggabungan.index') }}" id="resetButton" class="inline-flex items-center px-4 py-2 bg-gray-400 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-600 {{ request('search') ? '' : 'hidden' }}">Reset</a>
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <x-text-input type="text" id="searchInput" placeholder="Cari NOP/Nama/Tahun/Keterangan..." class="w-full md:w-80" value="{{ request('search') }}" />
+                            <a href="{{ route('penggabungan.index') }}" id="resetButton" class="inline-flex items-center px-4 py-2 bg-gray-400 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-600 {{ request('search') ? '' : 'hidden' }}">Reset</a>
+                        </div>
+                        {{-- TOMBOL CETAK LAPORAN --}}
+                        <a href="{{ route('penggabungan.filter-cetak-pdf') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 whitespace-nowrap">
+                            Cetak Laporan
+                        </a>
                     </div>
 
                     <div id="laporanTableContainer">
@@ -30,6 +46,7 @@
         </div>
     </div>
     @push('scripts')
+        {{-- Javascript untuk search dan pagination AJAX tidak berubah --}}
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.getElementById('searchInput');
