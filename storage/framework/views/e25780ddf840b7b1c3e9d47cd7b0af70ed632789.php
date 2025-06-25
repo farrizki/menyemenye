@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
         <title><?php echo e(config('app.name', 'Laravel')); ?></title>
+        <link rel="icon" type="image/png" href="<?php echo e(asset('images/favicon.png')); ?>">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -16,6 +17,7 @@
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+           
             <div>
                 <a href="/">
                     <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
@@ -35,6 +37,8 @@
 <?php endif; ?>
                 </a>
             </div>
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">
+                Sistem Informasi Pelayanan PBB</h1>
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
                 <?php echo e($slot); ?>
