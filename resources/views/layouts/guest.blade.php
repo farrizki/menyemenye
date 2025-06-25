@@ -23,8 +23,9 @@
                     <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                 </a>
             </div>
-                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">
-                Sistem Informasi Pelayanan PBB</h1>
+            <h1 class="text-4xl md:text-2xl font-bold text-gray-800 dark:text-white">
+                Sistem Informasi Pelayanan PBB
+            </h1>
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
