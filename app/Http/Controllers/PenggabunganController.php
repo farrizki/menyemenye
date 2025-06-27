@@ -30,6 +30,19 @@ class PenggabunganController extends Controller
             $pstPembatalan = PstDetail::on('oracle')->whereRaw("THN_PELAYANAN || BUNDEL_PELAYANAN || NO_URUT_PELAYANAN = ?", [$request->no_pelayanan_pembatalan])->first();
             $pstPembetulan = PstDetail::on('oracle')->whereRaw("THN_PELAYANAN || BUNDEL_PELAYANAN || NO_URUT_PELAYANAN = ?", [$request->no_pelayanan_pembetulan])->first();
             if (!$pstPembetulan || !$pstPembatalan) { return response()->json(['error' => 'Satu atau kedua Nomor Pelayanan tidak ditemukan.'], 404); }
+            // Validasi kd_jns_pelayanan untuk pembatalan harus 04
+            if ($pstPembatalan->kd_jns_pelayanan != '04') {
+                return response()->json([
+                    'error' => 'Nomor Pelayanan Pembatalan harus memiliki Jenis Pelayanan 04 (Pembatalan).'
+                ], 422);
+            }
+
+            // Validasi kd_jns_pelayanan untuk pembetulan harus 02 atau 03
+            if (!in_array($pstPembetulan->kd_jns_pelayanan, ['02', '03'])) {
+                return response()->json([
+                    'error' => 'Nomor Pelayanan Pembetulan harus memiliki Jenis Pelayanan 02 (Mutasi) atau 03 (Pembetulan).'
+                ], 422);
+            }
             $nopBatal = $pstPembatalan->kd_propinsi_pemohon . $pstPembatalan->kd_dati2_pemohon . $pstPembatalan->kd_kecamatan_pemohon . $pstPembatalan->kd_kelurahan_pemohon . $pstPembatalan->kd_blok_pemohon . $pstPembatalan->no_urut_pemohon . $pstPembatalan->kd_jns_op_pemohon;
             $spptBatal = Sppt::on('oracle')->whereRaw("kd_propinsi||kd_dati2||kd_kecamatan||kd_kelurahan||kd_blok||no_urut||kd_jns_op = ?", [$nopBatal])->where('thn_pajak_sppt', $pstPembatalan->thn_pajak_permohonan)->first();
             $nopBetul = $pstPembetulan->kd_propinsi_pemohon . $pstPembetulan->kd_dati2_pemohon . $pstPembetulan->kd_kecamatan_pemohon . $pstPembetulan->kd_kelurahan_pemohon . $pstPembetulan->kd_blok_pemohon . $pstPembetulan->no_urut_pemohon . $pstPembetulan->kd_jns_op_pemohon;
