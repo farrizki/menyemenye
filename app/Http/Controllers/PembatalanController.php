@@ -51,7 +51,7 @@ class PembatalanController extends Controller
 
     public function preview(Request $request)
     {
-        $request->validate([ 'input_type' => 'required|in:nop_manual,upload_excel', 'nop_manual' => 'required_if:input_type,nop_manual|string|nullable', 'excel_file' => 'required_if:input_type,upload_excel|file|mimes:xls,xlsx|max:24576', 'thn_pajak_sppt' => 'required_if:input_type,nop_manual|integer|min:2000', 'nomor_sk' => 'required|string|max:255', 'tahun_sk' => 'required|integer|min:2000', 'tgl_sk' => 'required|date', 'berkas' => 'required|file|mimes:pdf|max:24576', ]);
+        $request->validate([ 'input_type' => 'required|in:nop_manual,upload_excel', 'nop_manual' => 'required_if:input_type,nop_manual|string|nullable', 'excel_file' => 'required_if:input_type,upload_excel|file|mimes:xls,xlsx|max:24576', 'thn_pajak_sppt' => 'required_if:input_type,nop_manual|integer|min:2000', 'nomor_sk' => 'required|string|max:255', 'tahun_sk' => 'required|integer|min:2000', 'tgl_sk' => 'required|date', 'berkas' => 'required|file|mimes:pdf|max:102400', ]);
         $nops = []; $tahunPajakPerNop = []; $inputType = $request->input('input_type');
         if ($inputType === 'nop_manual') {
             $nops = array_map('trim', explode(',', $request->input('nop_manual'))); $tahunPajak = $request->input('thn_pajak_sppt');

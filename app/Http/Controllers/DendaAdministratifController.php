@@ -37,8 +37,8 @@ class DendaAdministratifController extends Controller
                     $q->orWhereRaw("LOWER(CONCAT(kd_propinsi, kd_dati2, kd_kecamatan, kd_kelurahan, kd_blok, no_urut, kd_jns_op)) LIKE ?", ['%' . $nopSearch . '%']);
                 }
                 $q->orWhereRaw("LOWER(nm_wp_sppt) LIKE ?", ['%' . $search . '%'])
-                  ->orWhereRaw("CAST(thn_pajak_sppt AS CHAR) LIKE ?", ['%' . $search . '%'])
-                  ->orWhereRaw("LOWER(no_sk) LIKE ?", ['%' . $search . '%']);
+                    ->orWhereRaw("CAST(thn_pajak_sppt AS CHAR) LIKE ?", ['%' . $search . '%'])
+                    ->orWhereRaw("LOWER(no_sk) LIKE ?", ['%' . $search . '%']);
             });
         }
         
@@ -70,10 +70,8 @@ class DendaAdministratifController extends Controller
     {
         $denda = DendaAdministratif::findOrFail($id);
         
-        // PERBAIKAN: Menyiapkan semua data yang dibutuhkan oleh view
         $denda->formatted_nop = $this->formatNop($denda->kd_propinsi . $denda->kd_dati2 . $denda->kd_kecamatan . $denda->kd_kelurahan . $denda->kd_blok . $denda->no_urut . $denda->kd_jns_op);
         
-        // Memecah no_sk untuk pre-fill form
         $parts = explode('/', $denda->no_sk);
         $denda->nomor_sk_raw = $parts[1] ?? '';
         $denda->tahun_sk_raw = $parts[4] ?? '';
@@ -95,11 +93,9 @@ class DendaAdministratifController extends Controller
 
     /**
      * Method untuk preview data sebelum update denda.
-     * Sekarang menangani 'create' dan 'edit'.
      */
     public function preview(Request $request)
     {
-        // Validasi, berkas tidak wajib saat edit (nullable)
         $request->validate([
             'input_type' => 'required|in:nop_manual,upload_excel,satu_desa',
             'nop_manual' => 'required_if:input_type,nop_manual|string|nullable',
@@ -111,11 +107,10 @@ class DendaAdministratifController extends Controller
             'nomor_sk' => 'required|string|max:255',
             'tahun_sk' => 'required|integer|min:2000|max:2100',
             'tgl_sk' => 'required|date',
-            'berkas' => 'nullable|file|mimes:pdf|max:24576',
+            'berkas' => 'nullable|file|mimes:pdf|max:102400',
             'denda_id' => 'sometimes|integer|exists:denda_administratif,id'
         ]);
 
-        // Simpan ID jika ini adalah proses edit
         if ($request->has('denda_id')) {
             $request->session()->put('denda_id_to_update', $request->input('denda_id'));
         } else {
@@ -125,7 +120,7 @@ class DendaAdministratifController extends Controller
         $nopTahunPairs = $this->getNopTahunPairs($request);
         
         if (empty($nopTahunPairs)) {
-            return redirect()->back()->withErrors(['nop' => 'Tidak ada NOP yang valid untuk diproses.'])->withInput();
+            return redirect()->back()->withErrors(['nop' => 'Tidak ada NOP yang valid untuk diproses. Pastikan NOP terdiri dari 18 digit angka.'])->withInput();
         }
 
         $tglJatuhTempoBaru = $request->input('tgl_jatuh_tempo_baru');
@@ -139,8 +134,11 @@ class DendaAdministratifController extends Controller
         }
 
         $dataToProcess = [];
+        // ✅ Ambil tipe input untuk diteruskan ke fungsi getDendaDetails
+        $inputType = $request->input('input_type');
         foreach ($nopTahunPairs as $pair) {
-            $dataToProcess[] = $this->getDendaDetails($pair['nop'], $pair['tahun']);
+            // ✅ Teruskan $inputType sebagai parameter
+            $dataToProcess[] = $this->getDendaDetails($pair['nop'], $pair['tahun'], $inputType);
         }
 
         $request->session()->put('denda_data_preview', $dataToProcess);
@@ -201,7 +199,8 @@ class DendaAdministratifController extends Controller
                             'letak_op' => $data['letak_op'], 'pokok' => $data['pokok'], 'denda' => $data['denda'], 'jumlah_pajak' => $data['jumlah_pajak'],
                             'sanksi_administratif' => $data['sanksi_administratif'], 'yang_harus_dibayar' => $data['yang_harus_dibayar'],
                             'no_sk' => $noSkLengkap, 'tgl_sk' => $tglSk, 'tgl_jatuh_tempo_baru' => $tglJatuhTempoBaru,
-                            'original_jatuh_tempo' => $data['tgl_jatuh_tempo_sppt_lama'], 'operator' => Auth::user()->name ?? 'System',
+                            'tgl_jatuh_tempo_sppt_lama' => $data['tgl_jatuh_tempo_sppt_lama'],
+                            'operator' => Auth::user()->name ?? 'System',
                         ];
 
                         if ($dendaId) {
@@ -219,10 +218,10 @@ class DendaAdministratifController extends Controller
                         }
                         $results[] = ['nop' => $data['formatted_nop'], 'status' => 'Berhasil', 'message' => 'Data berhasil diproses.'];
                     } else {
-                         $results[] = ['nop' => $data['formatted_nop'], 'status' => 'Gagal', 'message' => 'Gagal update Oracle (data tidak ditemukan/lunas).'];
+                        $results[] = ['nop' => $data['formatted_nop'], 'status' => 'Gagal', 'message' => 'Gagal update Oracle (data tidak ditemukan/lunas).'];
                     }
                 } catch (\Exception $e) {
-                     $results[] = ['nop' => $data['formatted_nop'], 'status' => 'Error', 'message' => 'Kesalahan sistem: ' . $e->getMessage()];
+                    $results[] = ['nop' => $data['formatted_nop'], 'status' => 'Error', 'message' => 'Kesalahan sistem: ' . $e->getMessage()];
                 }
             } else {
                 $results[] = ['nop' => $data['formatted_nop'], 'status' => $data['status_validasi'], 'message' => $data['message']];
@@ -246,13 +245,16 @@ class DendaAdministratifController extends Controller
                 ->where('kd_kecamatan', $denda->kd_kecamatan)->where('kd_kelurahan', $denda->kd_kelurahan)
                 ->where('kd_blok', $denda->kd_blok)->where('no_urut', $denda->no_urut)->where('kd_jns_op', $denda->kd_jns_op)
                 ->where('thn_pajak_sppt', $denda->thn_pajak_sppt)->where('status_pembayaran_sppt', 0)
-                ->update(['tgl_jatuh_tempo_sppt' => $denda->original_jatuh_tempo]);
+                ->update(['tgl_jatuh_tempo_sppt' => $denda->tgl_jatuh_tempo_sppt_lama]);
 
             if ($updatedOracle > 0) {
                 $denda->delete();
                 return redirect()->route('denda_administratif.index')->with('success', 'Record denda berhasil dihapus dan data Oracle dikembalikan.');
             }
-            return redirect()->route('denda_administratif.index')->withErrors('Gagal mengembalikan data Oracle. Mungkin status pembayaran sudah berubah.');
+            
+            $denda->delete();
+            return redirect()->route('denda_administratif.index')->with('warning', 'Record denda dihapus, namun data di Oracle tidak berubah (kemungkinan sudah lunas).');
+
         } catch (\Exception $e) {
             return redirect()->route('denda_administratif.index')->withErrors('Gagal menghapus data: ' . $e->getMessage());
         }
@@ -305,15 +307,19 @@ class DendaAdministratifController extends Controller
     }
     
     private function getNopTahunPairs(Request $request) {
-        $pairs = []; $inputType = $request->input('input_type');
+        $pairs = [];
+        $inputType = $request->input('input_type');
+        $thnInputYears = array_map('trim', explode(',', $request->input('thn_pajak_input')));
+
         if ($inputType === 'nop_manual') {
             $inputNopList = array_map('trim', explode(',', $request->input('nop_manual')));
-            $thnInputYears = array_map('trim', explode(',', $request->input('thn_pajak_input')));
             foreach ($inputNopList as $nopItem) {
                 if (empty($nopItem)) continue;
+                $nopClean = preg_replace('/[^0-9]/', '', $nopItem);
+                if (strlen($nopClean) !== 18) continue;
                 foreach ($thnInputYears as $year) {
                     if (empty($year)) continue;
-                    $pairs[] = ['nop' => $nopItem, 'tahun' => $year];
+                    $pairs[] = ['nop' => $nopClean, 'tahun' => $year];
                 }
             }
         } elseif ($inputType === 'upload_excel') {
@@ -322,10 +328,13 @@ class DendaAdministratifController extends Controller
                 $spreadsheet = IOFactory::load($file->getRealPath());
                 $sheet = $spreadsheet->getActiveSheet();
                 for ($row = 2; $row <= $sheet->getHighestRow(); $row++) {
-                    $nopExcel = str_replace(['.', '-', ' '], '', (string)$sheet->getCell('A' . $row)->getValue());
+                    $nopFromCell = (string)$sheet->getCell('A' . $row)->getValue();
+                    if (empty($nopFromCell)) continue;
+                    $nopClean = preg_replace('/[^0-9]/', '', $nopFromCell);
+                    if (strlen($nopClean) !== 18) continue;
                     $tahunExcel = (string)$sheet->getCell('B' . $row)->getValue();
-                    if (!empty($nopExcel) && ctype_digit($nopExcel) && strlen($nopExcel) == 18 && !empty($tahunExcel)) {
-                        $pairs[] = ['nop' => $nopExcel, 'tahun' => $tahunExcel];
+                    if (!empty($tahunExcel)) {
+                        $pairs[] = ['nop' => $nopClean, 'tahun' => $tahunExcel];
                     }
                 }
             } catch (ReaderException $e) { /* ... */ }
@@ -335,7 +344,6 @@ class DendaAdministratifController extends Controller
                 ->where('kd_propinsi', '35')->where('kd_dati2', '18')
                 ->where('kd_kecamatan', $request->input('kd_kecamatan_desa'))->where('kd_kelurahan', $request->input('kd_kelurahan_desa'))
                 ->distinct()->get();
-            $thnInputYears = array_map('trim', explode(',', $request->input('thn_pajak_input')));
             foreach ($spptRecords as $sppt) {
                 $nopFull = $sppt->kd_propinsi . $sppt->kd_dati2 . $sppt->kd_kecamatan . $sppt->kd_kelurahan . $sppt->kd_blok . $sppt->no_urut . $sppt->kd_jns_op;
                 foreach ($thnInputYears as $year) {
@@ -344,40 +352,95 @@ class DendaAdministratifController extends Controller
                 }
             }
         }
-        return $pairs;
+        
+        $uniquePairs = [];
+        $seen = [];
+        foreach ($pairs as $pair) {
+            $key = $pair['nop'] . '-' . $pair['tahun'];
+            if (!isset($seen[$key])) {
+                $uniquePairs[] = $pair;
+                $seen[$key] = true;
+            }
+        }
+        return $uniquePairs;
     }
 
-    private function getDendaDetails(string $nop, string $tahun) {
-        $kdPropinsi = substr($nop, 0, 2); $kdDati2 = substr($nop, 2, 2);
-        $kdKecamatan = substr($nop, 4, 3); $kdKelurahan = substr($nop, 7, 3);
-        $kdBlok = substr($nop, 10, 3); $noUrut = substr($nop, 13, 4); $kdJnsOp = substr($nop, 17, 1);
-        $spptData = Sppt::on('oracle')->where('kd_propinsi', $kdPropinsi)->where('kd_dati2', $kdDati2)->where('kd_kecamatan', $kdKecamatan)->where('kd_kelurahan', $kdKelurahan)->where('kd_blok', $kdBlok)->where('no_urut', $noUrut)->where('kd_jns_op', $kdJnsOp)->where('thn_pajak_sppt', $tahun)->first();
-        if (!$spptData) {
-            return ['nop' => $nop, 'thn_pajak_sppt' => $tahun, 'formatted_nop' => $this->formatNop($nop), 'status_validasi' => 'Gagal', 'message' => 'NOP/Tahun tidak ditemukan.'];
-        }
-        if ((int)$spptData->status_pembayaran_sppt !== 0) {
-            return ['nop' => $nop, 'thn_pajak_sppt' => $tahun, 'formatted_nop' => $this->formatNop($nop), 'nm_wp_sppt' => $spptData->nm_wp_sppt, 'status_validasi' => 'Tidak Diproses', 'message' => 'NOP sudah lunas.'];
-        }
-        $objekPajak = DatObjekPajak::on('oracle')->where('kd_propinsi', $kdPropinsi)->where('kd_dati2', $kdDati2)->where('kd_kecamatan', $kdKecamatan)->where('kd_kelurahan', $kdKelurahan)->where('kd_blok', $kdBlok)->where('no_urut', $noUrut)->where('kd_jns_op', $kdJnsOp)->first();
+    /**
+     * ✅ FUNGSI INI TELAH DIPERBARUI
+     * Menerima $inputType dan memeriksa nilai pajak.
+     */
+    private function getDendaDetails(string $nop, string $tahun, string $inputType) {
+    $kdPropinsi = substr($nop, 0, 2); $kdDati2 = substr($nop, 2, 2);
+    $kdKecamatan = substr($nop, 4, 3); $kdKelurahan = substr($nop, 7, 3);
+    $kdBlok = substr($nop, 10, 3); $noUrut = substr($nop, 13, 4); $kdJnsOp = substr($nop, 17, 1);
+    
+    // ✅ PERBAIKAN: Menggunakan operator '=' untuk pencarian NOP yang pasti
+    $spptData = Sppt::on('oracle')
+        ->where('kd_propinsi', $kdPropinsi)
+        ->where('kd_dati2', $kdDati2)
+        ->where('kd_kecamatan', $kdKecamatan)
+        ->where('kd_kelurahan', $kdKelurahan)
+        ->where('kd_blok', $kdBlok)
+        ->where('no_urut', $noUrut)
+        ->where('kd_jns_op', $kdJnsOp)
+        ->where('thn_pajak_sppt', $tahun)
+        ->first();
+    
+    // Struktur data dasar untuk ditampilkan di pratinjau
+    $result = [
+        'kd_propinsi' => $kdPropinsi, 'kd_dati2' => $kdDati2, 'kd_kecamatan' => $kdKecamatan, 'kd_kelurahan' => $kdKelurahan,
+        'kd_blok' => $kdBlok, 'no_urut' => $noUrut, 'kd_jns_op' => $kdJnsOp,
+        'nop' => $nop, 'formatted_nop' => $this->formatNop($nop), 'thn_pajak_sppt' => $tahun,
+        'nm_wp_sppt' => '-', 'alamat_wp' => '-', 'letak_op' => '-',
+        'pokok' => 0, 'denda' => 0, 'jumlah_pajak' => 0, 'sanksi_administratif' => 0, 'yang_harus_dibayar' => 0,
+        'tgl_jatuh_tempo_sppt_lama' => now(),
+        'status_validasi' => 'Gagal', 
+        'message' => 'NOP/Tahun tidak ditemukan.'
+    ];
+    
+    if ($spptData) {
+        // ✅ PERBAIKAN: Menggunakan operator '=' untuk pencarian NOP yang pasti
+        $objekPajak = DatObjekPajak::on('oracle')
+            ->where('kd_propinsi', $kdPropinsi)
+            ->where('kd_dati2', $kdDati2)
+            ->where('kd_kecamatan', $kdKecamatan)
+            ->where('kd_kelurahan', $kdKelurahan)
+            ->where('kd_blok', $kdBlok)
+            ->where('no_urut', $noUrut)
+            ->where('kd_jns_op', $kdJnsOp)
+            ->first();
+        
         $nmKelurahanOp = RefKelurahan::on('oracle')->where('kd_kecamatan', $kdKecamatan)->where('kd_kelurahan', $kdKelurahan)->value('nm_kelurahan');
         $nmKecamatanOp = RefKecamatan::on('oracle')->where('kd_kecamatan', $kdKecamatan)->value('nm_kecamatan');
-        $alamatWp = trim(($spptData->jln_wp_sppt ?? '') . ' RT. ' . ($spptData->rt_wp_sppt ?? '') . ' RW. ' . ($spptData->rw_wp_sppt ?? '') . ' Kel/Desa. ' . ($spptData->kelurahan_wp_sppt ?? '') . ' Kab/Kota. ' . ($spptData->kota_wp_sppt ?? '-'));
-        $letakOp = trim(($objekPajak->jalan_op ?? '') . ' RT. ' . ($objekPajak->rt_op ?? '') . ' RW. ' . ($objekPajak->rw_op ?? '') . ' Kel/Desa. ' . ($nmKelurahanOp ?? '') . ' Kec. ' . ($nmKecamatanOp ?? '') . ' Kab/Kota. Nganjuk');
+        
         $pokok = ceil((float)($spptData->pbb_yg_harus_dibayar_sppt ?? 0.0));
         $tglJatuhTempoSpptAsli = Carbon::parse($spptData->tgl_jatuh_tempo_sppt ?? now());
         $denda = ceil($this->calculateDenda($pokok, (int)$tahun, $tglJatuhTempoSpptAsli));
-        $jumlahPajak = $pokok + $denda;
-        return [
-            'kd_propinsi' => $kdPropinsi, 'kd_dati2' => $kdDati2, 'kd_kecamatan' => $kdKecamatan, 'kd_kelurahan' => $kdKelurahan,
-            'kd_blok' => $kdBlok, 'no_urut' => $noUrut, 'kd_jns_op' => $kdJnsOp,
-            'nop' => $nop, 'formatted_nop' => $this->formatNop($nop), 'thn_pajak_sppt' => $tahun,
-            'nm_wp_sppt' => $spptData->nm_wp_sppt, 'alamat_wp' => $alamatWp, 'letak_op' => $letakOp,
-            'pokok' => $pokok, 'denda' => $denda, 'jumlah_pajak' => $jumlahPajak,
-            'sanksi_administratif' => $denda, 'yang_harus_dibayar' => $pokok,
-            'original_jatuh_tempo' => $tglJatuhTempoSpptAsli, 'tgl_jatuh_tempo_sppt_lama' => $tglJatuhTempoSpptAsli,
-            'status_validasi' => 'Siap Diproses', 'message' => 'Data valid dan siap diproses.'
-        ];
+
+        $result['nm_wp_sppt'] = $spptData->nm_wp_sppt;
+        $result['alamat_wp'] = trim(($spptData->jln_wp_sppt ?? '') . ' RT. ' . ($spptData->rt_wp_sppt ?? '') . ' RW. ' . ($spptData->rw_wp_sppt ?? '') . ' Kel/Desa. ' . ($spptData->kelurahan_wp_sppt ?? '') . ' Kab/Kota. ' . ($spptData->kota_wp_sppt ?? '-'));
+        $result['letak_op'] = trim(($objekPajak->jalan_op ?? '') . ' RT. ' . ($objekPajak->rt_op ?? '') . ' RW. ' . ($objekPajak->rw_op ?? '') . ' Kel/Desa. ' . ($nmKelurahanOp ?? '') . ' Kec. ' . ($nmKecamatanOp ?? '') . ' Kab/Kota. Nganjuk');
+        $result['pokok'] = $pokok;
+        $result['denda'] = $denda;
+        $result['jumlah_pajak'] = $pokok + $denda;
+        $result['sanksi_administratif'] = $denda;
+        $result['yang_harus_dibayar'] = $pokok;
+        $result['tgl_jatuh_tempo_sppt_lama'] = $tglJatuhTempoSpptAsli;
+        
+        if ((int)$spptData->status_pembayaran_sppt !== 0) {
+            $result['status_validasi'] = 'Tidak Diproses';
+            $result['message'] = 'NOP sudah lunas.';
+        } elseif (($inputType === 'upload_excel' || $inputType === 'satu_desa') && $pokok > 250000) {
+            $result['status_validasi'] = 'Tidak Diproses';
+            $result['message'] = 'Pajak terutang (Rp ' . number_format($pokok) . ') melebihi batas Rp 250.000.';
+        } else {
+            $result['status_validasi'] = 'Siap Diproses';
+            $result['message'] = 'Data valid dan siap diproses.';
+        }
     }
+
+    return $result;
+}
     
     private function calculateDenda(float $pokok, int $tahun, Carbon $tglJatuhTempo) {
         $denda = 0.0; $today = Carbon::today();

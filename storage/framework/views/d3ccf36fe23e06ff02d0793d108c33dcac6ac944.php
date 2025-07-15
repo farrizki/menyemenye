@@ -19,7 +19,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-xl font-bold mb-4">Konfirmasi Penghapusan Denda Administratif</h3>
-
                     <p class="mb-4 text-sm text-gray-600">Berikut adalah status NOP yang akan diproses untuk denda:</p>
 
                     <div class="overflow-x-auto border rounded-lg mb-6">
@@ -41,57 +40,42 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <?php
-                                    $displayCount = 0;
-                                ?>
-
-                                <?php $__currentLoopData = $dataToProcess; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                
+                                <?php $__empty_1 = true; $__currentLoopData = $dataToProcess; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <?php
-                                        $shouldDisplay = false; 
                                         $currentStatus = $data['status_validasi'] ?? 'N/A';
-
-                                        if (isset($inputType) && $inputType === 'satu_desa') {
-                                            if ($currentStatus === 'Siap Diproses') {
-                                                $shouldDisplay = true;
-                                            }
-                                        } else {
-                                            if ($currentStatus === 'Siap Diproses' || $currentStatus === 'Gagal' || $currentStatus === 'Error') {
-                                                $shouldDisplay = true;
-                                            }
-                                        }
                                     ?>
+                                    <tr class="
+                                        <?php if($currentStatus == 'Siap Diproses'): ?> bg-blue-50 
+                                        <?php elseif($currentStatus == 'Gagal' || $currentStatus == 'Error'): ?> bg-red-50 
+                                        <?php else: ?> bg-yellow-50 <?php endif; ?>
+                                    ">
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['formatted_nop'] ?? $data['nop'] ?? '-'); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['thn_pajak_sppt'] ?? '-'); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['nm_wp_sppt'] ?? '-'); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['alamat_wp'] ?? '-'); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['letak_op'] ?? '-'); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['pokok'] ?? 0, 0, ',', '.')); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['denda'] ?? 0, 0, ',', '.')); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['jumlah_pajak'] ?? 0, 0, ',', '.')); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['sanksi_administratif'] ?? 0, 0, ',', '.')); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-semibold">Rp <?php echo e(number_format($data['yang_harus_dibayar'] ?? 0, 0, ',', '.')); ?></td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                <?php if($currentStatus == 'Siap Diproses'): ?> bg-blue-100 text-blue-800 
+                                                <?php elseif($currentStatus == 'Gagal' || $currentStatus == 'Error'): ?> bg-red-100 text-red-800 
+                                                <?php else: ?> bg-yellow-100 text-yellow-800 <?php endif; ?>
+                                            ">
+                                                <?php echo e($currentStatus); ?>
 
-                                    <?php if($shouldDisplay): ?>
-                                        <?php $displayCount++; ?>
-                                        <tr class="<?php echo e($currentStatus == 'Siap Diproses' ? 'bg-blue-50' : 'bg-red-50'); ?>">
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['formatted_nop'] ?? $data['nop'] ?? '-'); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['thn_pajak_sppt'] ?? '-'); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['nm_wp_sppt'] ?? '-'); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['alamat_wp'] ?? '-'); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm"><?php echo e($data['letak_op'] ?? '-'); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['pokok'] ?? 0, 0, ',', '.')); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['denda'] ?? 0, 0, ',', '.')); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['jumlah_pajak'] ?? 0, 0, ',', '.')); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp <?php echo e(number_format($data['sanksi_administratif'] ?? 0, 0, ',', '.')); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-semibold">Rp <?php echo e(number_format($data['yang_harus_dibayar'] ?? 0, 0, ',', '.')); ?></td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    <?php if($currentStatus == 'Gagal' || $currentStatus == 'Error'): ?> bg-red-100 text-red-800 <?php endif; ?>
-                                                    <?php if($currentStatus == 'Siap Diproses'): ?> bg-blue-100 text-blue-800 <?php endif; ?>
-                                                ">
-                                                    <?php echo e($currentStatus); ?>
-
-                                                </span>
-                                            </td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600"><?php echo e($data['message'] ?? 'N/A'); ?></td>
-                                        </tr>
-                                    <?php endif; ?>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-                                <?php if($displayCount === 0): ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600"><?php echo e($data['message'] ?? 'N/A'); ?></td>
+                                    </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="13" class="text-center py-4 px-6 text-gray-500">
-                                            Tidak ada data yang siap diproses untuk kriteria yang dipilih.
+                                            Tidak ada data untuk dipratinjau.
                                         </td>
                                     </tr>
                                 <?php endif; ?>

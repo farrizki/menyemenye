@@ -71,7 +71,7 @@
                             </div>
 
                             <div class="mt-4">
-                                <x-input-label for="berkas" :value="__('Upload Berkas (PDF, Max 24MB)')" />
+                                <x-input-label for="berkas" :value="__('Upload Berkas (PDF, Max 100MB)')" />
                                 <input id="berkas" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="berkas" accept="application/pdf" required />
                             </div>
                         </div>

@@ -10,7 +10,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-xl font-bold mb-4">Konfirmasi Penghapusan Denda Administratif</h3>
-
                     <p class="mb-4 text-sm text-gray-600">Berikut adalah status NOP yang akan diproses untuk denda:</p>
 
                     <div class="overflow-x-auto border rounded-lg mb-6">
@@ -32,59 +31,44 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @php
-                                    $displayCount = 0;
-                                @endphp
-
-                                @foreach ($dataToProcess as $data)
+                                {{-- ✅ PERBAIKAN: Logika rumit dihapus, semua data ditampilkan --}}
+                                @forelse ($dataToProcess as $data)
                                     @php
-                                        $shouldDisplay = false; 
                                         $currentStatus = $data['status_validasi'] ?? 'N/A';
-
-                                        if (isset($inputType) && $inputType === 'satu_desa') {
-                                            if ($currentStatus === 'Siap Diproses') {
-                                                $shouldDisplay = true;
-                                            }
-                                        } else {
-                                            if ($currentStatus === 'Siap Diproses' || $currentStatus === 'Gagal' || $currentStatus === 'Error') {
-                                                $shouldDisplay = true;
-                                            }
-                                        }
                                     @endphp
-
-                                    @if ($shouldDisplay)
-                                        @php $displayCount++; @endphp
-                                        <tr class="{{ $currentStatus == 'Siap Diproses' ? 'bg-blue-50' : 'bg-red-50' }}">
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['formatted_nop'] ?? $data['nop'] ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['thn_pajak_sppt'] ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['nm_wp_sppt'] ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['alamat_wp'] ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['letak_op'] ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['pokok'] ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['denda'] ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['jumlah_pajak'] ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['sanksi_administratif'] ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-semibold">Rp {{ number_format($data['yang_harus_dibayar'] ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    @if($currentStatus == 'Gagal' || $currentStatus == 'Error') bg-red-100 text-red-800 @endif
-                                                    @if($currentStatus == 'Siap Diproses') bg-blue-100 text-blue-800 @endif
-                                                ">
-                                                    {{ $currentStatus }}
-                                                </span>
-                                            </td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600">{{ $data['message'] ?? 'N/A' }}</td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-
-                                @if ($displayCount === 0)
+                                    <tr class="
+                                        @if($currentStatus == 'Siap Diproses') bg-blue-50 
+                                        @elseif($currentStatus == 'Gagal' || $currentStatus == 'Error') bg-red-50 
+                                        @else bg-yellow-50 @endif
+                                    ">
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['formatted_nop'] ?? $data['nop'] ?? '-' }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['thn_pajak_sppt'] ?? '-' }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['nm_wp_sppt'] ?? '-' }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['alamat_wp'] ?? '-' }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">{{ $data['letak_op'] ?? '-' }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['pokok'] ?? 0, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['denda'] ?? 0, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['jumlah_pajak'] ?? 0, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($data['sanksi_administratif'] ?? 0, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-semibold">Rp {{ number_format($data['yang_harus_dibayar'] ?? 0, 0, ',', '.') }}</td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if($currentStatus == 'Siap Diproses') bg-blue-100 text-blue-800 
+                                                @elseif($currentStatus == 'Gagal' || $currentStatus == 'Error') bg-red-100 text-red-800 
+                                                @else bg-yellow-100 text-yellow-800 @endif
+                                            ">
+                                                {{ $currentStatus }}
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600">{{ $data['message'] ?? 'N/A' }}</td>
+                                    </tr>
+                                @empty
                                     <tr>
                                         <td colspan="13" class="text-center py-4 px-6 text-gray-500">
-                                            Tidak ada data yang siap diproses untuk kriteria yang dipilih.
+                                            Tidak ada data untuk dipratinjau.
                                         </td>
                                     </tr>
-                                @endif
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
